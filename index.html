@@ -12,8 +12,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;900&text=%E6%92%95%E6%AF%81%E6%97%A0%E6%95%88%E5%B0%81&display=swap">
 <style>
-/* Layout: a tamper-evident "void if removed" seal label stuck on a frosted glass plaque,
-   held by four pentalobe screws, with warm and cool light glowing through from behind.
+/* Layout: a tamper-evident "void if removed" seal label stuck on a full-screen pane of frosted glass,
+   with warm and cool light glowing through from behind.
    One corner of the label is lifting, leaving patchy VOID residue on the glass. */
 :root {
   --orange: #E9572F;
@@ -64,57 +64,25 @@ body {
   to { transform: translate3d(4vw, 3vh, 0) scale(1.08); }
 }
 
-/* ---------- the glass plaque ---------- */
+/* ---------- the whole screen is frosted glass ---------- */
 .glass {
-  position: relative;
-  z-index: 1;
-  width: min(1000px, 100%);
-  padding: 72px 64px;
-  border-radius: 28px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 45%, rgba(255,255,255,0.09) 100%);
-  -webkit-backdrop-filter: blur(30px) saturate(160%);
-  backdrop-filter: blur(30px) saturate(160%);
-  border: 1px solid rgba(255,255,255,0.20);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.40),
-    inset 1px 0 0 rgba(255,255,255,0.10),
-    inset 0 -1px 0 rgba(255,255,255,0.06),
-    0 40px 90px rgba(0,0,0,0.55),
-    0 2px 6px rgba(0,0,0,0.35);
-}
-/* polished edge and a soft diagonal reflection */
-.glass::before {
-  content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(118deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.10) 38%, rgba(255,255,255,0) 46%);
+  z-index: 0;
   pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(118deg, rgba(255,255,255,0) 22%, rgba(255,255,255,0.07) 31%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 64%, rgba(255,255,255,0.04) 70%, rgba(255,255,255,0) 76%),
+    linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+  -webkit-backdrop-filter: blur(42px) saturate(160%);
+  backdrop-filter: blur(42px) saturate(160%);
 }
-.glass::after {
-  content: "";
-  position: absolute;
-  inset: 6px;
-  border-radius: 22px;
-  border: 1px solid rgba(255,255,255,0.07);
-  pointer-events: none;
-}
-.screw {
-  position: absolute;
-  width: 26px;
-  height: 26px;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45));
-}
-.screw.tl { top: 22px; left: 22px; transform: rotate(12deg); }
-.screw.tr { top: 22px; right: 22px; transform: rotate(47deg); }
-.screw.bl { bottom: 22px; left: 22px; transform: rotate(64deg); }
-.screw.br { bottom: 22px; right: 22px; transform: rotate(28deg); }
 
 /* ---------- the label ---------- */
 .label-wrap {
   position: relative;
   z-index: 1;
-  width: 100%;
+  width: min(900px, 100%);
 }
 .label-shadow {
   filter: drop-shadow(0 1px 1px rgba(0,0,0,0.45)) drop-shadow(0 4px 10px rgba(0,0,0,0.22));
@@ -134,14 +102,14 @@ body {
 }
 .tab {
   flex: none;
-  width: 132px;
+  width: clamp(84px, 13vw, 132px);
   display: grid;
   place-items: center;
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.9 0 0 0 0 0.8 0 0 0 0.10 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E"),
     var(--orange);
 }
-.tab svg { width: 92px; height: 92px; }
+.tab svg { width: 70%; height: auto; max-width: 92px; }
 .seal-glyph {
   font-family: var(--cjk);
   font-weight: 900;
@@ -150,7 +118,7 @@ body {
 .film {
   flex: 1;
   min-width: 0;
-  padding: 26px 34px 30px;
+  padding: 26px clamp(20px, 3.4vw, 34px) 30px;
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 3.2 -1.55'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23s)'/%3E%3C/svg%3E"),
     linear-gradient(120deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 30%, rgba(214,226,240,0.25) 60%, rgba(255,255,255,0) 85%),
@@ -181,7 +149,7 @@ h1 {
   align-items: center;
   gap: 14px;
   margin: 14px 0 12px;
-  font: 700 clamp(40px, 6.4vw, 60px)/1 var(--sans);
+  font: 700 clamp(34px, 5.6vw, 60px)/1 var(--sans);
   letter-spacing: -0.01em;
 }
 h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
@@ -227,17 +195,10 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
   letter-spacing: 0.04em;
 }
 
-/* ---------- small screens: the label stands upright, tabs top and bottom ---------- */
-@media (max-width: 700px) {
+/* ---------- phones: the label stands upright, tabs top and bottom ---------- */
+@media (max-width: 560px) {
   :root { --peel: 92px; }
-  body { padding: 28px 14px; }
-  .glass { padding: 52px 18px; border-radius: 22px; }
-  .glass::after { border-radius: 17px; }
-  .screw { width: 20px; height: 20px; }
-  .screw.tl, .screw.tr { top: 16px; }
-  .screw.bl, .screw.br { bottom: 16px; }
-  .screw.tl, .screw.bl { left: 16px; }
-  .screw.tr, .screw.br { right: 16px; }
+  body { padding: 28px 18px; }
   .label { flex-direction: column; }
   .tab { width: auto; height: 112px; }
   .tab svg { width: 80px; height: 80px; }
@@ -254,35 +215,9 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
 </style>
 </head>
 <body>
-<!-- pentalobe screw, drawn once -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <radialGradient id="head" cx="38%" cy="32%" r="72%">
-      <stop offset="0" stop-color="#E4E6EA"/>
-      <stop offset="0.5" stop-color="#9A9DA3"/>
-      <stop offset="1" stop-color="#55585D"/>
-    </radialGradient>
-    <symbol id="pentalobe" viewBox="0 0 40 40">
-      <circle cx="20" cy="20" r="17" fill="url(#head)"/>
-      <circle cx="20" cy="20" r="16.3" fill="none" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="0.8"/>
-      <g fill="#1A1B1E">
-        <circle cx="20" cy="20" r="3.9"/>
-        <circle cx="20" cy="15.2" r="2.5"/>
-        <circle cx="24.57" cy="18.52" r="2.5"/>
-        <circle cx="22.82" cy="23.88" r="2.5"/>
-        <circle cx="17.18" cy="23.88" r="2.5"/>
-        <circle cx="15.43" cy="18.52" r="2.5"/>
-      </g>
-    </symbol>
-  </defs>
-</svg>
 <div class="glow" aria-hidden="true"><span class="a"></span><span class="b"></span><span class="c"></span></div>
 
-<div class="glass">
-  <svg class="screw tl" aria-hidden="true"><use href="#pentalobe"/></svg>
-  <svg class="screw tr" aria-hidden="true"><use href="#pentalobe"/></svg>
-  <svg class="screw bl" aria-hidden="true"><use href="#pentalobe"/></svg>
-  <svg class="screw br" aria-hidden="true"><use href="#pentalobe"/></svg>
+<div class="glass" aria-hidden="true"></div>
 
 <main class="label-wrap">
   <div class="label-shadow">
@@ -391,6 +326,5 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
     <path d="M46 150Q74 72 150 44" fill="none" stroke="#000" stroke-opacity="0.28" stroke-width="3" filter="url(#softer)"/>
   </svg>
 </main>
-</div>
 </body>
 </html>
