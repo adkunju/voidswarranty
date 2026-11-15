@@ -5,68 +5,116 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Voids Warranty</title>
 <meta name="description" content="A project blog about taking things apart, changing them and putting them back better. Coming later.">
+<meta name="theme-color" content="#0D0E11">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 76 76'%3E%3Crect width='76' height='76' rx='14' fill='%23E9572F'/%3E%3Ccircle cx='38' cy='38' r='25' fill='none' stroke='%23F3E83A' stroke-width='6'/%3E%3Cpath d='M20 56L56 20' stroke='%23F3E83A' stroke-width='6'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;900&text=%E6%92%95%E6%AF%81%E6%97%A0%E6%95%88%E5%B0%81&display=swap">
 <style>
-/* Layout: a tamper-evident "void if removed" seal label, stuck on the space-grey aluminium
-   underside of a laptop, ringed by pentalobe screws. One corner is peeling, showing VOID residue. */
+/* Layout: a tamper-evident "void if removed" seal label stuck on a frosted glass plaque,
+   held by four pentalobe screws, with warm and cool light glowing through from behind.
+   One corner of the label is lifting, leaving patchy VOID residue on the glass. */
 :root {
-  --alu: #46484C;
   --orange: #E9572F;
   --yellow: #F3E83A;
   --silver: #C9CCCF;
   --chip: #EEEFF0;
   --ink: #141517;
-  --peel: 96px;
+  --peel: 104px;
   --radius: 10px;
   --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
   --cjk: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html { min-height: 100%; background: #36383C; }
+html { min-height: 100%; background: #0D0E11; }
 body {
-  margin: 0;
   position: relative;
+  margin: 0;
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 72px 28px;
+  padding: 48px 28px;
   color: var(--ink);
   font-family: var(--sans);
   overflow-x: hidden;
-  /* bead-blasted anodised aluminium */
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E"),
-    radial-gradient(90% 70% at 30% 20%, rgba(255,255,255,0.10), rgba(255,255,255,0) 60%),
-    linear-gradient(160deg, #4E5055 0%, #404246 55%, #36383C 100%);
-  background-color: var(--alu);
 }
-/* the rounded edge of the bottom case */
-.case {
-  position: absolute;
-  inset: 10px;
-  border-radius: 22px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 0 0 1px rgba(0,0,0,0.35), inset 0 0 60px rgba(0,0,0,0.35);
-  pointer-events: none;
+
+/* ---------- light behind the glass ---------- */
+.glow {
+  position: fixed;
+  inset: 0;
   z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.glow span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.7;
+  animation: drift 22s ease-in-out infinite alternate;
+}
+.glow .a { width: 46vmax; height: 46vmax; left: -8vmax; top: -10vmax; background: radial-gradient(circle, #E9572F 0%, rgba(233,87,47,0) 68%); }
+.glow .b { width: 50vmax; height: 50vmax; right: -14vmax; bottom: -16vmax; background: radial-gradient(circle, #2F5FD0 0%, rgba(47,95,208,0) 68%); animation-delay: -8s; }
+.glow .c { width: 26vmax; height: 26vmax; right: 18vw; top: 6vh; background: radial-gradient(circle, #F3C43A 0%, rgba(243,196,58,0) 70%); opacity: 0.35; animation-delay: -14s; }
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(4vw, 3vh, 0) scale(1.08); }
+}
+
+/* ---------- the glass plaque ---------- */
+.glass {
+  position: relative;
+  z-index: 1;
+  width: min(1000px, 100%);
+  padding: 72px 64px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 45%, rgba(255,255,255,0.09) 100%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  backdrop-filter: blur(30px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.20);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.40),
+    inset 1px 0 0 rgba(255,255,255,0.10),
+    inset 0 -1px 0 rgba(255,255,255,0.06),
+    0 40px 90px rgba(0,0,0,0.55),
+    0 2px 6px rgba(0,0,0,0.35);
+}
+/* polished edge and a soft diagonal reflection */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(118deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.10) 38%, rgba(255,255,255,0) 46%);
+  pointer-events: none;
+}
+.glass::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.07);
+  pointer-events: none;
 }
 .screw {
   position: absolute;
   width: 26px;
   height: 26px;
-  z-index: 0;
-  filter: drop-shadow(0 1px 0 rgba(255,255,255,0.08));
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45));
 }
+.screw.tl { top: 22px; left: 22px; transform: rotate(12deg); }
+.screw.tr { top: 22px; right: 22px; transform: rotate(47deg); }
+.screw.bl { bottom: 22px; left: 22px; transform: rotate(64deg); }
+.screw.br { bottom: 22px; right: 22px; transform: rotate(28deg); }
 
 /* ---------- the label ---------- */
 .label-wrap {
   position: relative;
   z-index: 1;
-  width: min(900px, 100%);
+  width: 100%;
 }
 .label-shadow {
   filter: drop-shadow(0 1px 1px rgba(0,0,0,0.45)) drop-shadow(0 4px 10px rgba(0,0,0,0.22));
@@ -77,11 +125,11 @@ body {
   overflow: hidden;
   -webkit-mask:
     linear-gradient(#000 0 0),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 150' preserveAspectRatio='none'%3E%3Cpath d='M150 30Q96 104 10 150L150 150Z'/%3E%3C/svg%3E") right bottom / var(--peel) var(--peel) no-repeat;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 150' preserveAspectRatio='none'%3E%3Cpath d='M150 44Q74 72 46 150L150 150Z'/%3E%3C/svg%3E") right bottom / var(--peel) var(--peel) no-repeat;
   -webkit-mask-composite: xor;
   mask:
     linear-gradient(#000 0 0),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 150' preserveAspectRatio='none'%3E%3Cpath d='M150 30Q96 104 10 150L150 150Z'/%3E%3C/svg%3E") right bottom / var(--peel) var(--peel) no-repeat;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 150' preserveAspectRatio='none'%3E%3Cpath d='M150 44Q74 72 46 150L150 150Z'/%3E%3C/svg%3E") right bottom / var(--peel) var(--peel) no-repeat;
   mask-composite: exclude;
 }
 .tab {
@@ -161,6 +209,7 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
 .small { display: flex; flex-wrap: wrap; gap: 2px 14px; }
 .small span, .nw { white-space: nowrap; }
 
+
 /* ---------- the peel ---------- */
 .peel {
   position: absolute;
@@ -174,14 +223,21 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
 .peel text {
   font-family: var(--sans);
   font-weight: 700;
-  font-size: 15px;
+  font-size: 13px;
   letter-spacing: 0.04em;
 }
 
 /* ---------- small screens: the label stands upright, tabs top and bottom ---------- */
 @media (max-width: 700px) {
-  :root { --peel: 88px; }
-  body { padding: 56px 22px; }
+  :root { --peel: 92px; }
+  body { padding: 28px 14px; }
+  .glass { padding: 52px 18px; border-radius: 22px; }
+  .glass::after { border-radius: 17px; }
+  .screw { width: 20px; height: 20px; }
+  .screw.tl, .screw.tr { top: 16px; }
+  .screw.bl, .screw.br { bottom: 16px; }
+  .screw.tl, .screw.bl { left: 16px; }
+  .screw.tr, .screw.br { right: 16px; }
   .label { flex-direction: column; }
   .tab { width: auto; height: 112px; }
   .tab svg { width: 80px; height: 80px; }
@@ -191,11 +247,9 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
   h1 { gap: 10px; font-size: clamp(34px, 11vw, 48px); }
   .lede { font-size: 15px; }
   .small { font-size: 12px; letter-spacing: 0.05em; }
-  .screw { width: 20px; height: 20px; }
-  .screw.side { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .flip { animation: none; }
+  .flip, .glow span { animation: none; }
 }
 </style>
 </head>
@@ -203,16 +257,15 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
 <!-- pentalobe screw, drawn once -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="head" cx="40%" cy="35%" r="70%">
-      <stop offset="0" stop-color="#A5A8AD"/>
-      <stop offset="0.55" stop-color="#6E7176"/>
-      <stop offset="1" stop-color="#3C3E42"/>
+    <radialGradient id="head" cx="38%" cy="32%" r="72%">
+      <stop offset="0" stop-color="#E4E6EA"/>
+      <stop offset="0.5" stop-color="#9A9DA3"/>
+      <stop offset="1" stop-color="#55585D"/>
     </radialGradient>
     <symbol id="pentalobe" viewBox="0 0 40 40">
-      <circle cx="20" cy="20" r="17.5" fill="#1E1F22" fill-opacity="0.55"/>
-      <circle cx="20" cy="20" r="16" fill="url(#head)"/>
-      <circle cx="20" cy="20" r="15.3" fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="0.8"/>
-      <g fill="#111214">
+      <circle cx="20" cy="20" r="17" fill="url(#head)"/>
+      <circle cx="20" cy="20" r="16.3" fill="none" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="0.8"/>
+      <g fill="#1A1B1E">
         <circle cx="20" cy="20" r="3.9"/>
         <circle cx="20" cy="15.2" r="2.5"/>
         <circle cx="24.57" cy="18.52" r="2.5"/>
@@ -223,17 +276,13 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
     </symbol>
   </defs>
 </svg>
-<div class="case" aria-hidden="true"></div>
-<svg class="screw" style="top:24px;left:24px;transform:rotate(12deg)" aria-hidden="true"><use href="#pentalobe"/></svg>
-<svg class="screw" style="top:24px;left:calc(33% - 13px);transform:rotate(47deg)" aria-hidden="true"><use href="#pentalobe"/></svg>
-<svg class="screw" style="top:24px;left:calc(67% - 13px);transform:rotate(3deg)" aria-hidden="true"><use href="#pentalobe"/></svg>
-<svg class="screw" style="top:24px;right:24px;transform:rotate(31deg)" aria-hidden="true"><use href="#pentalobe"/></svg>
-<svg class="screw side" style="top:calc(50% - 13px);left:24px;transform:rotate(22deg)" aria-hidden="true"><use href="#pentalobe"/></svg>
-<svg class="screw side" style="top:calc(50% - 13px);right:24px;transform:rotate(58deg)" aria-hidden="true"><use href="#pentalobe"/></svg>
-<svg class="screw" style="bottom:24px;left:24px;transform:rotate(64deg)" aria-hidden="true"><use href="#pentalobe"/></svg>
-<svg class="screw" style="bottom:24px;left:calc(33% - 13px);transform:rotate(18deg)" aria-hidden="true"><use href="#pentalobe"/></svg>
-<svg class="screw" style="bottom:24px;left:calc(67% - 13px);transform:rotate(40deg)" aria-hidden="true"><use href="#pentalobe"/></svg>
-<svg class="screw" style="bottom:24px;right:24px;transform:rotate(8deg)" aria-hidden="true"><use href="#pentalobe"/></svg>
+<div class="glow" aria-hidden="true"><span class="a"></span><span class="b"></span><span class="c"></span></div>
+
+<div class="glass">
+  <svg class="screw tl" aria-hidden="true"><use href="#pentalobe"/></svg>
+  <svg class="screw tr" aria-hidden="true"><use href="#pentalobe"/></svg>
+  <svg class="screw bl" aria-hidden="true"><use href="#pentalobe"/></svg>
+  <svg class="screw br" aria-hidden="true"><use href="#pentalobe"/></svg>
 
 <main class="label-wrap">
   <div class="label-shadow">
@@ -273,52 +322,75 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
     </div>
   </div>
 
-  <!-- Peeled corner: VOID residue left on the aluminium, the flap's shadow, then the curled flap. -->
+  <!-- Lifted corner: patchy VOID residue left on the glass, the soft shadow under the lifted flap,
+       then the flap itself, rolled like a cylinder so it reads as curling up off the surface. -->
   <svg class="peel" viewBox="0 0 150 150" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <pattern id="residue" width="62" height="34" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)">
-        <text x="0" y="14" fill="#F06A42" fill-opacity="0.92">VOID</text>
-        <text x="31" y="31" fill="#F06A42" fill-opacity="0.92">VOID</text>
-        <text x="-31" y="31" fill="#F06A42" fill-opacity="0.92">VOID</text>
+      <pattern id="residue" width="54" height="30" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)">
+        <text x="0" y="12" fill="#F0663E">VOID</text>
+        <text x="27" y="27" fill="#F0663E">VOID</text>
+        <text x="-27" y="27" fill="#F0663E">VOID</text>
       </pattern>
-      <pattern id="ghost" width="62" height="34" patternUnits="userSpaceOnUse" patternTransform="rotate(18) scale(-1 1)">
-        <text x="0" y="14" fill="#E9572F" fill-opacity="0.22">VOID</text>
-        <text x="31" y="31" fill="#E9572F" fill-opacity="0.22">VOID</text>
-        <text x="-31" y="31" fill="#E9572F" fill-opacity="0.22">VOID</text>
-      </pattern>
-      <linearGradient id="flap-shade" gradientUnits="userSpaceOnUse" x1="92" y1="100" x2="50" y2="38">
-        <stop offset="0" stop-color="#8E9196"/>
-        <stop offset="0.18" stop-color="#C4C7CB"/>
-        <stop offset="0.48" stop-color="#F4F5F6"/>
-        <stop offset="0.78" stop-color="#DDE0E3"/>
-        <stop offset="1" stop-color="#C3C6CA"/>
-      </linearGradient>
-      <linearGradient id="residue-shade" gradientUnits="userSpaceOnUse" x1="90" y1="96" x2="150" y2="150">
-        <stop offset="0" stop-color="#000000" stop-opacity="0.45"/>
-        <stop offset="0.4" stop-color="#000000" stop-opacity="0.08"/>
-        <stop offset="1" stop-color="#000000" stop-opacity="0"/>
-      </linearGradient>
-      <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
-        <feGaussianBlur stdDeviation="4"/>
+      <!-- residue never transfers cleanly: break it up with noise -->
+      <filter id="patchy" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.22" numOctaves="2" seed="7" result="n"/>
+        <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.6 1.75" result="m"/>
+        <feComposite in="SourceGraphic" in2="m" operator="in"/>
       </filter>
+      <pattern id="ghost" width="54" height="30" patternUnits="userSpaceOnUse" patternTransform="rotate(18) scale(-1 1)">
+        <text x="0" y="12" fill="#B9BCC0">VOID</text>
+        <text x="27" y="27" fill="#B9BCC0">VOID</text>
+        <text x="-27" y="27" fill="#B9BCC0">VOID</text>
+      </pattern>
+      <!-- shading across the roll: dark where it bends at the base, a bright band, then easing off toward the tip -->
+      <linearGradient id="roll" gradientUnits="userSpaceOnUse" x1="86" y1="88" x2="48" y2="50">
+        <stop offset="0" stop-color="#6F7277"/>
+        <stop offset="0.12" stop-color="#A4A7AC"/>
+        <stop offset="0.34" stop-color="#F7F8F9"/>
+        <stop offset="0.5" stop-color="#E3E5E8"/>
+        <stop offset="0.82" stop-color="#C9CCD0"/>
+        <stop offset="1" stop-color="#B4B7BC"/>
+      </linearGradient>
+      <radialGradient id="contact" gradientUnits="userSpaceOnUse" cx="96" cy="96" r="62">
+        <stop offset="0" stop-color="#000" stop-opacity="0.55"/>
+        <stop offset="0.45" stop-color="#000" stop-opacity="0.22"/>
+        <stop offset="1" stop-color="#000" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="6"/>
+      </filter>
+      <filter id="softer" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="2.2"/>
+      </filter>
+      <clipPath id="exposed">
+        <path d="M150 44Q74 72 46 150L136 150Q150 150 150 136Z"/>
+      </clipPath>
       <clipPath id="flap-clip">
-        <path d="M150 30C120 29 82 31 63 35Q51 38 51 49C50 80 32 121 10 150Q96 104 150 30Z"/>
+        <path id="flap" d="M150 44C134 32 108 28 86 33C68 37 56 46 49 60C42 76 38 112 46 150Q74 72 150 44Z"/>
       </clipPath>
     </defs>
 
-    <path d="M150 30Q96 104 10 150L135 150Q150 150 150 135Z" fill="url(#residue)"/>
-    <path d="M150 30Q96 104 10 150L135 150Q150 150 150 135Z" fill="url(#residue-shade)"/>
+    <!-- residue on the glass, and the shadow pooled under the curl -->
+    <g clip-path="url(#exposed)">
+      <rect width="150" height="150" fill="url(#residue)" filter="url(#patchy)" opacity="0.85"/>
+      <rect width="150" height="150" fill="url(#contact)"/>
+    </g>
 
-    <path d="M150 30C120 29 82 31 63 35Q51 38 51 49C50 80 32 121 10 150Q96 104 150 30Z" transform="translate(7 9)" fill="#000000" fill-opacity="0.45" filter="url(#soft)"/>
+    <!-- shadow the lifted flap casts back onto the label and glass -->
+    <path d="M150 44C134 32 108 28 86 33C68 37 56 46 49 60C42 76 38 112 46 150Q74 72 150 44Z" transform="translate(9 11)" fill="#000" fill-opacity="0.42" filter="url(#soft)"/>
+    <path d="M150 44C134 32 108 28 86 33C68 37 56 46 49 60C42 76 38 112 46 150Q74 72 150 44Z" transform="translate(3 4)" fill="#000" fill-opacity="0.25" filter="url(#softer)"/>
 
-    <path d="M150 30C120 29 82 31 63 35Q51 38 51 49C50 80 32 121 10 150Q96 104 150 30Z" fill="url(#flap-shade)"/>
-    <g clip-path="url(#flap-clip)">
+    <!-- the flap: underside of the label -->
+    <path d="M150 44C134 32 108 28 86 33C68 37 56 46 49 60C42 76 38 112 46 150Q74 72 150 44Z" fill="url(#roll)"/>
+    <g clip-path="url(#flap-clip)" opacity="0.32">
       <rect width="150" height="150" fill="url(#ghost)"/>
     </g>
-    <path d="M150 30C120 29 82 31 63 35Q51 38 51 49C50 80 32 121 10 150" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="0.8"/>
-    <path d="M10 150Q96 104 150 30" fill="none" stroke="#6E7176" stroke-opacity="0.6" stroke-width="2.4" stroke-linecap="round"/>
-    <path d="M12 148Q95 102 148 33" fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="0.9" stroke-linecap="round"/>
+    <!-- thin bright rim along the free edge, softened where it meets the surface -->
+    <path d="M146 41C132 32 108 29 86 34C68 38 57 47 50 61C43 77 40 110 46 144" fill="none" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="0.9" stroke-linecap="round"/>
+    <!-- where the label still grips: a soft crease, not a hard fold -->
+    <path d="M46 150Q74 72 150 44" fill="none" stroke="#000" stroke-opacity="0.28" stroke-width="3" filter="url(#softer)"/>
   </svg>
 </main>
+</div>
 </body>
 </html>
