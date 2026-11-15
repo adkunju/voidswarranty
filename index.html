@@ -14,7 +14,8 @@
 <style>
 /* Layout: a tamper-evident "void if removed" seal label stuck on a full-screen pane of frosted glass,
    with warm and cool light glowing through from behind.
-   One corner of the label is lifting, leaving patchy VOID residue on the glass. */
+   The bottom-left corner can be peeled by dragging. Lifting it leaves white VOID residue on the glass,
+   the flap's glue has VOID-shaped gaps, and once it sticks back it never sits quite right. */
 :root {
   --orange: #E9572F;
   --yellow: #F3E83A;
@@ -28,7 +29,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html { min-height: 100%; background: #0D0E11; }
+html { min-height: 100%; background: #0D0E11; overflow-x: hidden; }
 body {
   position: relative;
   margin: 0;
@@ -38,7 +39,7 @@ body {
   padding: 48px 28px;
   color: var(--ink);
   font-family: var(--sans);
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* ---------- light behind the glass ---------- */
@@ -91,14 +92,6 @@ body {
   display: flex;
   border-radius: var(--radius);
   overflow: hidden;
-  -webkit-mask:
-    linear-gradient(#000 0 0),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 150' preserveAspectRatio='none'%3E%3Cpath d='M150 44Q74 72 46 150L150 150Z'/%3E%3C/svg%3E") right bottom / var(--peel) var(--peel) no-repeat;
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 150' preserveAspectRatio='none'%3E%3Cpath d='M150 44Q74 72 46 150L150 150Z'/%3E%3C/svg%3E") right bottom / var(--peel) var(--peel) no-repeat;
-  mask-composite: exclude;
 }
 .tab {
   flex: none;
@@ -178,22 +171,26 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
 .small span, .nw { white-space: nowrap; }
 
 
-/* ---------- the peel ---------- */
-.peel {
+/* ---------- the peel (drawn live by the script at the bottom) ---------- */
+.label-shadow { position: relative; z-index: 1; }
+.residue, .fx, .damage { position: absolute; pointer-events: none; }
+.residue { left: 0; top: 0; z-index: 0; opacity: 0.94; }
+.fx { z-index: 2; }
+.damage { left: 0; top: 0; z-index: 5; }
+.film, .tab { position: relative; }
+.grab {
   position: absolute;
-  right: 0;
-  bottom: 0;
-  width: var(--peel);
-  height: var(--peel);
-  overflow: visible;
-  pointer-events: none;
+  left: -26px;
+  bottom: -26px;
+  width: 132px;
+  height: 132px;
+  z-index: 3;
+  border-radius: 50%;
+  cursor: grab;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
 }
-.peel text {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.04em;
-}
+.grab.held { cursor: grabbing; }
 
 /* ---------- phones: the label stands upright, tabs top and bottom ---------- */
 @media (max-width: 560px) {
@@ -208,6 +205,7 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
   h1 { gap: 10px; font-size: clamp(34px, 11vw, 48px); }
   .lede { font-size: 15px; }
   .small { font-size: 12px; letter-spacing: 0.05em; }
+  .grab { width: 108px; height: 108px; left: -20px; bottom: -20px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .flip, .glow span { animation: none; }
@@ -220,8 +218,10 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
 <div class="glass" aria-hidden="true"></div>
 
 <main class="label-wrap">
+  <canvas class="residue" aria-hidden="true"></canvas>
   <div class="label-shadow">
     <div class="label">
+      <canvas class="damage" aria-hidden="true"></canvas>
       <div class="tab" aria-hidden="true">
         <!-- do not touch -->
         <svg viewBox="0 0 100 100" fill="none" stroke="#F3E83A" stroke-linecap="round" stroke-linejoin="round">
@@ -257,74 +257,451 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
     </div>
   </div>
 
-  <!-- Lifted corner: patchy VOID residue left on the glass, the soft shadow under the lifted flap,
-       then the flap itself, rolled like a cylinder so it reads as curling up off the surface. -->
-  <svg class="peel" viewBox="0 0 150 150" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <pattern id="residue" width="54" height="30" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)">
-        <text x="0" y="12" fill="#F0663E">VOID</text>
-        <text x="27" y="27" fill="#F0663E">VOID</text>
-        <text x="-27" y="27" fill="#F0663E">VOID</text>
-      </pattern>
-      <!-- residue never transfers cleanly: break it up with noise -->
-      <filter id="patchy" x="0" y="0" width="100%" height="100%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.22" numOctaves="2" seed="7" result="n"/>
-        <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.6 1.75" result="m"/>
-        <feComposite in="SourceGraphic" in2="m" operator="in"/>
-      </filter>
-      <pattern id="ghost" width="54" height="30" patternUnits="userSpaceOnUse" patternTransform="rotate(18) scale(-1 1)">
-        <text x="0" y="12" fill="#B9BCC0">VOID</text>
-        <text x="27" y="27" fill="#B9BCC0">VOID</text>
-        <text x="-27" y="27" fill="#B9BCC0">VOID</text>
-      </pattern>
-      <!-- shading across the roll: dark where it bends at the base, a bright band, then easing off toward the tip -->
-      <linearGradient id="roll" gradientUnits="userSpaceOnUse" x1="86" y1="88" x2="48" y2="50">
-        <stop offset="0" stop-color="#6F7277"/>
-        <stop offset="0.12" stop-color="#A4A7AC"/>
-        <stop offset="0.34" stop-color="#F7F8F9"/>
-        <stop offset="0.5" stop-color="#E3E5E8"/>
-        <stop offset="0.82" stop-color="#C9CCD0"/>
-        <stop offset="1" stop-color="#B4B7BC"/>
-      </linearGradient>
-      <radialGradient id="contact" gradientUnits="userSpaceOnUse" cx="96" cy="96" r="62">
-        <stop offset="0" stop-color="#000" stop-opacity="0.55"/>
-        <stop offset="0.45" stop-color="#000" stop-opacity="0.22"/>
-        <stop offset="1" stop-color="#000" stop-opacity="0"/>
-      </radialGradient>
-      <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
-        <feGaussianBlur stdDeviation="6"/>
-      </filter>
-      <filter id="softer" x="-40%" y="-40%" width="180%" height="180%">
-        <feGaussianBlur stdDeviation="2.2"/>
-      </filter>
-      <clipPath id="exposed">
-        <path d="M150 44Q74 72 46 150L136 150Q150 150 150 136Z"/>
-      </clipPath>
-      <clipPath id="flap-clip">
-        <path id="flap" d="M150 44C134 32 108 28 86 33C68 37 56 46 49 60C42 76 38 112 46 150Q74 72 150 44Z"/>
-      </clipPath>
-    </defs>
-
-    <!-- residue on the glass, and the shadow pooled under the curl -->
-    <g clip-path="url(#exposed)">
-      <rect width="150" height="150" fill="url(#residue)" filter="url(#patchy)" opacity="0.85"/>
-      <rect width="150" height="150" fill="url(#contact)"/>
-    </g>
-
-    <!-- shadow the lifted flap casts back onto the label and glass -->
-    <path d="M150 44C134 32 108 28 86 33C68 37 56 46 49 60C42 76 38 112 46 150Q74 72 150 44Z" transform="translate(9 11)" fill="#000" fill-opacity="0.42" filter="url(#soft)"/>
-    <path d="M150 44C134 32 108 28 86 33C68 37 56 46 49 60C42 76 38 112 46 150Q74 72 150 44Z" transform="translate(3 4)" fill="#000" fill-opacity="0.25" filter="url(#softer)"/>
-
-    <!-- the flap: underside of the label -->
-    <path d="M150 44C134 32 108 28 86 33C68 37 56 46 49 60C42 76 38 112 46 150Q74 72 150 44Z" fill="url(#roll)"/>
-    <g clip-path="url(#flap-clip)" opacity="0.32">
-      <rect width="150" height="150" fill="url(#ghost)"/>
-    </g>
-    <!-- thin bright rim along the free edge, softened where it meets the surface -->
-    <path d="M146 41C132 32 108 29 86 34C68 38 57 47 50 61C43 77 40 110 46 144" fill="none" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="0.9" stroke-linecap="round"/>
-    <!-- where the label still grips: a soft crease, not a hard fold -->
-    <path d="M46 150Q74 72 150 44" fill="none" stroke="#000" stroke-opacity="0.28" stroke-width="3" filter="url(#softer)"/>
-  </svg>
+  <canvas class="fx" aria-hidden="true"></canvas>
+  <div class="grab" aria-hidden="true" title="Peel the corner"></div>
 </main>
+<script>
+/* Peelable tamper label.
+   The bottom-left corner follows the pointer. The fold line is the perpendicular bisector of the
+   drag, the lifted part rolls over a small cylinder and then lies flat, face down.
+   Anything ever lifted leaves white VOID residue on the glass and is scarred when it goes back down. */
+(() => {
+  const wrap = document.querySelector('.label-wrap');
+  const label = wrap.querySelector('.label');
+  const residueC = wrap.querySelector('.residue');
+  const fxC = wrap.querySelector('.fx');
+  const damageC = label.querySelector('.damage');
+  const grab = wrap.querySelector('.grab');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const PI = Math.PI, M = 150, RADIUS = 10;
+  const norm3 = a => { const l = Math.hypot(a[0], a[1], a[2]); return a.map(x => x / l); };
+  const LIGHT = norm3([-0.35, -0.55, 0.76]);
+  const HALF = norm3([LIGHT[0], LIGHT[1], LIGHT[2] + 1]);
+
+  let W = 0, H = 0, dpr = 1;
+  let v = { x: 0, y: 0 }, rest = { x: 0, y: 0 };
+  let tex = null, mask = null, scars = null, sil = null;
+  let dragging = false, off = null, anim = 0, touched = false, queued = false, peels = 0;
+
+  const rng = seed => () => {
+    seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+  const px = n => Math.max(1, Math.round(n * dpr));
+  const makeCanvas = (w, h) => { const c = document.createElement('canvas'); c.width = px(w); c.height = px(h); return c; };
+  const fit = (c, w, h) => { c.width = px(w); c.height = px(h); c.style.width = w + 'px'; c.style.height = h + 'px'; };
+  const roundRect = ctx => {
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(0, 0, W, H, RADIUS); else ctx.rect(0, 0, W, H);
+  };
+
+  /* ---------- textures, built once per size ---------- */
+  function regions() {
+    const lr = label.getBoundingClientRect();
+    return [...label.querySelectorAll('.tab, .film')].map(el => {
+      const r = el.getBoundingClientRect();
+      return { tab: el.classList.contains('tab'), x: r.left - lr.left, y: r.top - lr.top, w: r.width, h: r.height };
+    });
+  }
+
+  function build() {
+    const rand = rng(20261116);
+
+    // The VOID lettering the adhesive leaves behind. Transfer is never clean, so it is broken up.
+    const voids = makeCanvas(W, H), vc = voids.getContext('2d');
+    vc.scale(dpr, dpr);
+    vc.fillStyle = '#FFFFFF';
+    vc.font = "700 13px 'IBM Plex Sans', system-ui, sans-serif";
+    vc.textBaseline = 'middle';
+    vc.textAlign = 'center';
+    vc.save();
+    vc.translate(W / 2, H / 2);
+    vc.rotate(-18 * PI / 180);
+    const ext = Math.hypot(W, H) / 2 + 40, sx = 46, sy = 21;
+    for (let y = -ext, row = 0; y < ext; y += sy, row++) {
+      for (let x = -ext + (row % 2 ? sx / 2 : 0); x < ext; x += sx) vc.fillText('VOID', x, y);
+    }
+    vc.restore();
+    vc.globalCompositeOperation = 'destination-out';
+    for (let i = 0, n = W * H / 28; i < n; i++) {
+      vc.globalAlpha = 0.45 + rand() * 0.55;
+      vc.beginPath(); vc.arc(rand() * W, rand() * H, 0.35 + rand() * 1.2, 0, 2 * PI); vc.fill();
+    }
+    for (let i = 0, n = W * H / 2600; i < n; i++) {
+      vc.globalAlpha = 0.2 + rand() * 0.45;
+      vc.beginPath(); vc.arc(rand() * W, rand() * H, 3 + rand() * 10, 0, 2 * PI); vc.fill();
+    }
+    vc.globalAlpha = 1;
+    vc.globalCompositeOperation = 'source-over';
+
+    const regs = regions();
+
+    // Underside: white glue with VOID-shaped gaps where it stayed on the glass; the film shows through the gaps.
+    const under = makeCanvas(W, H), uc = under.getContext('2d');
+    uc.scale(dpr, dpr);
+    for (const r of regs) { uc.fillStyle = r.tab ? '#C24B2B' : '#A9ADB3'; uc.fillRect(r.x - 1, r.y - 1, r.w + 2, r.h + 2); }
+    const glue = makeCanvas(W, H), gc = glue.getContext('2d');
+    gc.scale(dpr, dpr);
+    gc.fillStyle = '#F1F0EB';
+    gc.fillRect(0, 0, W, H);
+    for (let i = 0, n = W * H / 50; i < n; i++) {
+      gc.fillStyle = `rgba(90,80,60,${rand() * 0.06})`;
+      gc.fillRect(rand() * W, rand() * H, 1, 1);
+    }
+    gc.setTransform(1, 0, 0, 1, 0, 0);
+    gc.globalCompositeOperation = 'destination-out';
+    gc.drawImage(voids, 0, 0);
+    uc.setTransform(1, 0, 0, 1, 0, 0);
+    uc.drawImage(glue, 0, 0);
+
+    // Front face, only seen on the thin rising edge of the curl.
+    const front = makeCanvas(W, H), fc = front.getContext('2d');
+    fc.scale(dpr, dpr);
+    for (const r of regs) { fc.fillStyle = r.tab ? '#E9572F' : '#C9CCCF'; fc.fillRect(r.x - 1, r.y - 1, r.w + 2, r.h + 2); }
+
+    tex = { voids, under, front };
+  }
+
+  const carry = old => {
+    const c = makeCanvas(W, H);
+    if (old) c.getContext('2d').drawImage(old, 0, 0, c.width, c.height);
+    return c;
+  };
+
+  function setup() {
+    const w = label.offsetWidth, h = label.offsetHeight;
+    if (!w || !h) return;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = w; H = h;
+    fit(residueC, W, H);
+    fit(damageC, W, H);
+    fxC.style.left = fxC.style.top = -M + 'px';
+    fit(fxC, W + 2 * M, H + 2 * M);
+    sil = makeCanvas(W + 2 * M, H + 2 * M);
+    mask = carry(mask);
+    scars = carry(scars);
+    build();
+    const base = Math.min(W, H) * 0.045 + 6;
+    rest = { x: base + Math.min(peels, 5) * 3, y: -(base * 0.8 + Math.min(peels, 5) * 2.4) };
+    if (!dragging) v = { ...rest };
+    render(false);
+  }
+
+  /* ---------- geometry ---------- */
+  function geom(vx, vy) {
+    const D = Math.hypot(vx, vy);
+    if (D < 0.75) return null;
+    const n = { x: vx / D, y: vy / D };
+    const r0 = Math.min(22, Math.max(10, Math.min(W, H) * 0.07));
+    const r = Math.min(r0, Math.max(1.5, D * 0.17));
+    const a = (D + PI * r) / 2;          // where the label still grips, measured from the corner along n
+    const C = { x: 0, y: H };
+    const m = a + C.x * n.x + C.y * n.y; // so that depth d(X) = m - X·n, positive on the lifted side
+    return { D, n, r, a, C, m, K: { x: C.x + a * n.x, y: C.y + a * n.y } };
+  }
+
+  // Polygon of the label that is still stuck down (half-plane cut of the rectangle).
+  function stuckPolygon(G) {
+    const pts = [{ x: 0, y: 0 }, { x: W, y: 0 }, { x: W, y: H }, { x: 0, y: H }], out = [];
+    const f = P => P.x * G.n.x + P.y * G.n.y - G.m;
+    for (let i = 0; i < 4; i++) {
+      const A = pts[i], B = pts[(i + 1) % 4], fa = f(A), fb = f(B);
+      if (fa >= 0) out.push(A);
+      if ((fa >= 0) !== (fb >= 0)) { const t = fa / (fa - fb); out.push({ x: A.x + (B.x - A.x) * t, y: A.y + (B.y - A.y) * t }); }
+    }
+    return out;
+  }
+
+  // A band of the label between two depths from the grip line.
+  function band(ctx, G, d0, d1) {
+    const L = W + H + 2 * M, t = { x: -G.n.y, y: G.n.x };
+    const q = d => ({ x: G.C.x + (G.a - d) * G.n.x, y: G.C.y + (G.a - d) * G.n.y });
+    const A = q(d0), B = q(d1);
+    ctx.beginPath();
+    ctx.moveTo(A.x + L * t.x, A.y + L * t.y);
+    ctx.lineTo(A.x - L * t.x, A.y - L * t.y);
+    ctx.lineTo(B.x - L * t.x, B.y - L * t.y);
+    ctx.lineTo(B.x + L * t.x, B.y + L * t.y);
+    ctx.closePath();
+  }
+
+  // Slice the lifted part: thin strips around the roll, then one flat face-down piece.
+  function strips(G) {
+    const out = [], roll = PI * G.r, cyl = Math.min(G.a, roll);
+    const N = Math.min(44, Math.max(8, Math.ceil(cyl / 1.4)));
+    const p = d => d < roll ? G.r * Math.sin(d / G.r) : -(d - roll);
+    for (let i = 0; i < N; i++) {
+      const d0 = cyl * i / N, d1 = cyl * (i + 1) / N;
+      out.push({ d0, d1, p0: p(d0), p1: p(d1), th: (d0 + d1) / 2 / G.r });
+    }
+    if (G.a > roll) out.push({ d0: roll, d1: G.a + 4, p0: 0, p1: -(G.a + 4 - roll), th: PI });
+    return out;
+  }
+
+  // Affine map taking a strip of the flat label to where it sits once lifted.
+  function stripTransform(G, s) {
+    const k = (s.p1 - s.p0) / (s.d1 - s.d0), q = 1 - k, n = G.n;
+    const a = 1 - q * n.x * n.x, b = -q * n.x * n.y, d = 1 - q * n.y * n.y;
+    const c = q * G.m + k * s.d0 - s.p0;
+    return [a, b, b, d, c * n.x, c * n.y];
+  }
+
+  function shade(G, s) {
+    const n = G.n, th = s.th, sn = Math.sin(th), cs = Math.cos(th);
+    const front = th < PI / 2;
+    const N = front ? [-sn * n.x, -sn * n.y, cs] : [sn * n.x, sn * n.y, -cs];
+    const diff = Math.max(0, N[0] * LIGHT[0] + N[1] * LIGHT[1] + N[2] * LIGHT[2]);
+    const bri = (0.36 + 0.72 * diff) / (0.36 + 0.72 * LIGHT[2]);
+    const spec = Math.pow(Math.max(0, N[0] * HALF[0] + N[1] * HALF[1] + N[2] * HALF[2]), 28) * (front ? 0.22 : 0.42);
+    return { front, bri, spec };
+  }
+
+  function drawStrip(ctx, G, s, silhouette) {
+    const [a, b, c, d, e, f] = stripTransform(G, s);
+    ctx.save();
+    ctx.setTransform(dpr * a, dpr * b, dpr * c, dpr * d, dpr * (e + M), dpr * (f + M));
+    roundRect(ctx); ctx.clip();
+    band(ctx, G, s.d0 - 0.6, s.d1 + 0.6); ctx.clip();
+    const all = () => ctx.fillRect(-M, -M, W + 2 * M, H + 2 * M);
+    if (silhouette) {
+      ctx.fillStyle = '#000'; all();
+    } else {
+      const sh = shade(G, s);
+      ctx.drawImage(sh.front ? tex.front : tex.under, 0, 0, W, H);
+      if (sh.bri < 1) { ctx.fillStyle = `rgba(0,0,0,${Math.min(0.78, 1 - sh.bri)})`; all(); }
+      else if (sh.bri > 1.01) { ctx.fillStyle = `rgba(255,255,255,${Math.min(0.3, sh.bri - 1)})`; all(); }
+      if (sh.spec > 0.01) { ctx.fillStyle = `rgba(255,255,255,${sh.spec})`; all(); }
+      if (s.th >= PI && G.a > PI * G.r + 4) {
+        // the flat flap is never perfectly flat: light falls off toward the free corner
+        const q = d => ({ x: G.C.x + (G.a - d) * G.n.x, y: G.C.y + (G.a - d) * G.n.y });
+        const A = q(PI * G.r), B = q(G.a);
+        const g = ctx.createLinearGradient(A.x, A.y, B.x, B.y);
+        g.addColorStop(0, 'rgba(255,255,255,0.10)');
+        g.addColorStop(0.35, 'rgba(0,0,0,0)');
+        g.addColorStop(1, 'rgba(0,0,0,0.12)');
+        ctx.fillStyle = g; all();
+      }
+    }
+    ctx.restore();
+  }
+
+  /* ---------- residue on the glass, scars on the label ---------- */
+  function grow(G) {
+    const c = mask.getContext('2d');
+    c.save();
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    roundRect(c); c.clip();
+    band(c, G, 0, G.a + 4);
+    c.fillStyle = '#000';
+    c.fill();
+    c.restore();
+  }
+
+  function paintMarks() {
+    const r = residueC.getContext('2d');
+    r.globalCompositeOperation = 'source-over';
+    r.clearRect(0, 0, residueC.width, residueC.height);
+    r.drawImage(mask, 0, 0);
+    r.globalCompositeOperation = 'source-in';
+    r.drawImage(tex.voids, 0, 0);
+    r.globalCompositeOperation = 'source-over';
+
+    // The face of a tamper label shows VOID wherever it has been lifted.
+    const d = damageC.getContext('2d');
+    d.globalCompositeOperation = 'source-over';
+    d.globalAlpha = 1;
+    d.clearRect(0, 0, damageC.width, damageC.height);
+    d.drawImage(mask, 0, 0);
+    d.globalCompositeOperation = 'source-in';
+    d.globalAlpha = 0.42;
+    d.drawImage(tex.voids, 0, 0);
+    d.globalAlpha = 1;
+    d.globalCompositeOperation = 'source-over';
+    d.drawImage(scars, 0, 0);
+  }
+
+  function addScars(G) {
+    const c = scars.getContext('2d'), rand = Math.random;
+    const t = { x: -G.n.y, y: G.n.x }, L = W + H;
+    c.save();
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    roundRect(c); c.clip();
+
+    // a crease where it was bent hardest
+    const crease = (offset, color, width) => {
+      c.beginPath();
+      for (let s = -L, first = true; s <= L; s += 5, first = false) {
+        const j = offset + (rand() - 0.5) * 0.8;
+        const x = G.K.x + s * t.x - j * G.n.x, y = G.K.y + s * t.y - j * G.n.y;
+        first ? c.moveTo(x, y) : c.lineTo(x, y);
+      }
+      c.strokeStyle = color; c.lineWidth = width; c.stroke();
+    };
+    crease(0.9, 'rgba(0,0,0,0.22)', 1.1);
+    crease(-0.5, 'rgba(255,255,255,0.5)', 0.9);
+
+    // air trapped when it went back down
+    const count = 3 + Math.floor(rand() * 5);
+    for (let i = 0; i < count; i++) {
+      const s = (rand() - 0.5) * Math.min(L, G.a * 1.8);
+      const u = 5 + rand() * G.a * 0.75;
+      const x = G.K.x + s * t.x - u * G.n.x, y = G.K.y + s * t.y - u * G.n.y;
+      const r = 2 + rand() * 5.5;
+      const g = c.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, 'rgba(255,255,255,0.04)');
+      g.addColorStop(0.72, 'rgba(255,255,255,0.12)');
+      g.addColorStop(0.93, 'rgba(255,255,255,0.5)');
+      g.addColorStop(1, 'rgba(0,0,0,0.18)');
+      c.fillStyle = g;
+      c.beginPath(); c.arc(x, y, r, 0, 2 * PI); c.fill();
+      c.fillStyle = 'rgba(255,255,255,0.75)';
+      c.beginPath(); c.arc(x - r * 0.35, y - r * 0.38, Math.max(0.6, r * 0.22), 0, 2 * PI); c.fill();
+      c.strokeStyle = 'rgba(0,0,0,0.16)'; c.lineWidth = 0.8;
+      c.beginPath(); c.arc(x + 0.5, y + 0.6, r, 0.1 * PI, 0.9 * PI); c.stroke();
+    }
+
+    // a few fine wrinkles running out from the old corner
+    for (let i = 0; i < 2 + Math.floor(rand() * 3); i++) {
+      const sx = rand() * Math.min(W, G.a * 0.8), sy = H - rand() * Math.min(H, G.a * 0.6);
+      const len = 8 + rand() * 26, ang = -PI / 4 + (rand() - 0.5) * 1.2;
+      c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx + Math.cos(ang) * len, sy + Math.sin(ang) * len);
+      c.strokeStyle = 'rgba(0,0,0,0.13)'; c.lineWidth = 0.8; c.stroke();
+      c.beginPath(); c.moveTo(sx + 0.8, sy - 0.6); c.lineTo(sx + 0.8 + Math.cos(ang) * len, sy - 0.6 + Math.sin(ang) * len);
+      c.strokeStyle = 'rgba(255,255,255,0.32)'; c.lineWidth = 0.7; c.stroke();
+    }
+    c.restore();
+  }
+
+  /* ---------- frame ---------- */
+  function render(growMask) {
+    if (!tex) return;
+    const G = geom(v.x, v.y);
+
+    if (!G) label.style.clipPath = '';
+    else {
+      const pts = stuckPolygon(G);
+      label.style.clipPath = pts.length > 2
+        ? `polygon(${pts.map(p => `${p.x.toFixed(2)}px ${p.y.toFixed(2)}px`).join(',')})`
+        : 'polygon(0 0, 0 0, 0 0)';
+      if (growMask) grow(G);
+    }
+    paintMarks();
+
+    const ctx = fxC.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, fxC.width, fxC.height);
+    if (!G) return;
+    const list = strips(G);
+
+    // dark pocket under the roll
+    ctx.save();
+    ctx.setTransform(dpr, 0, 0, dpr, dpr * M, dpr * M);
+    roundRect(ctx); ctx.clip();
+    band(ctx, G, 0, G.a + 4); ctx.clip();
+    const k = G.K, reach = G.r * 2.6;
+    const pocket = ctx.createLinearGradient(k.x, k.y, k.x - G.n.x * reach, k.y - G.n.y * reach);
+    pocket.addColorStop(0, 'rgba(0,0,0,0.55)');
+    pocket.addColorStop(0.4, 'rgba(0,0,0,0.2)');
+    pocket.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = pocket;
+    ctx.fillRect(-M, -M, W + 2 * M, H + 2 * M);
+    ctx.restore();
+
+    // shadow cast by the lifted flap
+    const sc = sil.getContext('2d');
+    sc.setTransform(1, 0, 0, 1, 0, 0);
+    sc.clearRect(0, 0, sil.width, sil.height);
+    for (const s of list) drawStrip(sc, G, s, true);
+    const lift = Math.min(1, G.D / 60);
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.shadowColor = `rgba(0,0,0,${0.22 + 0.2 * lift})`;
+    ctx.shadowBlur = (4 + G.r * 0.7 * lift) * dpr;
+    ctx.shadowOffsetX = 20000 + G.r * 0.5 * lift * dpr;
+    ctx.shadowOffsetY = G.r * 0.8 * lift * dpr;
+    ctx.drawImage(sil, -20000, 0);
+    ctx.restore();
+
+    // the flap itself
+    for (const s of list) drawStrip(ctx, G, s, false);
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { queued = false; render(true); });
+  }
+
+  /* ---------- interaction ---------- */
+  function animateTo(to, dur, after) {
+    cancelAnimationFrame(anim);
+    const from = { ...v }, t0 = performance.now();
+    const step = now => {
+      const t = Math.min(1, (now - t0) / Math.max(1, dur)), e = 1 - Math.pow(1 - t, 3);
+      v = { x: from.x + (to.x - from.x) * e, y: from.y + (to.y - from.y) * e };
+      render(false);
+      if (t < 1) anim = requestAnimationFrame(step); else if (after) after();
+    };
+    anim = requestAnimationFrame(step);
+  }
+
+  function restick() {
+    const G = geom(v.x, v.y);
+    if (G && G.D > 28) { addScars(G); peels++; }
+    // each time it loses a little tack, so the corner sits a touch higher
+    const base = Math.min(W, H) * 0.045 + 6;
+    rest = { x: base + Math.min(peels, 5) * 3, y: -(base * 0.8 + Math.min(peels, 5) * 2.4) };
+    animateTo(rest, reduce ? 1 : 460);
+  }
+
+  const local = e => { const r = label.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+
+  grab.addEventListener('pointerdown', e => {
+    if (!W) return;
+    e.preventDefault();
+    touched = true;
+    dragging = true;
+    cancelAnimationFrame(anim);
+    try { grab.setPointerCapture(e.pointerId); } catch (_) {}
+    const p = local(e);
+    off = { x: p.x - v.x, y: p.y - (H + v.y) };
+    grab.classList.add('held');
+  });
+  grab.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const p = local(e);
+    let x = Math.max(0, p.x - off.x), y = Math.min(0, p.y - off.y - H);
+    const max = Math.hypot(W, H) * 0.78, D = Math.hypot(x, y);
+    if (D > max) { x *= max / D; y *= max / D; }
+    v = { x, y };
+    schedule();
+  });
+  const end = () => {
+    if (!dragging) return;
+    dragging = false;
+    grab.classList.remove('held');
+    restick();
+  };
+  grab.addEventListener('pointerup', end);
+  grab.addEventListener('pointercancel', end);
+  grab.addEventListener('lostpointercapture', end);
+
+  // until someone tries it, the corner lifts now and then
+  function hint() {
+    if (touched || dragging || reduce || !tex) return;
+    const peak = { x: rest.x + 26, y: rest.y - 20 };
+    animateTo(peak, 520, () => { if (!touched) animateTo(rest, 620); });
+  }
+  setTimeout(hint, 1400);
+  setInterval(hint, 4800);
+
+  new ResizeObserver(() => { if (!dragging) setup(); }).observe(label);
+  setup();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(setup);
+
+})();
+</script>
 </body>
 </html>
