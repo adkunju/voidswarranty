@@ -14,8 +14,8 @@
 <style>
 /* Layout: a tamper-evident "void if removed" seal label stuck on a full-screen pane of frosted glass,
    with warm and cool light glowing through from behind.
-   The bottom-left corner can be peeled by dragging. Lifting it leaves white VOID residue on the glass,
-   the flap's glue has VOID-shaped gaps, and once it sticks back it never sits quite right. */
+   Any edge or corner can be picked at and peeled. Lifting leaves white VOID residue on the glass and
+   VOID-shaped gaps in the glue. Peeled right off, the label can be dropped anywhere and sticks as it lands. */
 :root {
   --orange: #E9572F;
   --yellow: #F3E83A;
@@ -39,7 +39,7 @@ body {
   padding: 48px 28px;
   color: var(--ink);
   font-family: var(--sans);
-  overflow-x: clip;
+  overflow: clip;
 }
 
 /* ---------- light behind the glass ---------- */
@@ -172,25 +172,24 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
 
 
 /* ---------- the peel (drawn live by the script at the bottom) ---------- */
-.label-shadow { position: relative; z-index: 1; }
-.residue, .fx, .damage { position: absolute; pointer-events: none; }
-.residue { left: 0; top: 0; z-index: 0; opacity: 0.94; }
+.residue, .fx { position: absolute; left: 0; top: 0; pointer-events: none; }
+.residue { z-index: 0; opacity: 0.94; }
 .fx { z-index: 2; }
-.damage { left: 0; top: 0; z-index: 5; }
+.sticker { position: relative; transform-origin: 0 0; }
+.sticker.settle { transition: transform 0.18s ease-out; }
+.label-shadow { position: relative; transition: filter 0.18s; }
+.sticker.held .label-shadow { filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4)) drop-shadow(0 24px 28px rgba(0,0,0,0.42)); }
+.label { position: relative; }
 .film, .tab { position: relative; }
-.grab {
-  position: absolute;
-  left: -26px;
-  bottom: -26px;
-  width: 132px;
-  height: 132px;
-  z-index: 3;
-  border-radius: 50%;
-  cursor: grab;
-  touch-action: none;
-  -webkit-tap-highlight-color: transparent;
-}
-.grab.held { cursor: grabbing; }
+.damage, .back { position: absolute; left: 0; top: 0; pointer-events: none; }
+.damage { z-index: 5; }
+.back { z-index: 6; display: none; border-radius: var(--radius); }
+/* grab strips along every edge; the middle of the label stays free so phones can still scroll */
+.edge { position: absolute; z-index: 7; cursor: grab; touch-action: none; -webkit-tap-highlight-color: transparent; }
+.edge.t, .edge.b { left: -18px; right: -18px; height: 46px; }
+.edge.l, .edge.r { top: -18px; bottom: -18px; width: 46px; }
+.edge.t { top: -18px; } .edge.b { bottom: -18px; } .edge.l { left: -18px; } .edge.r { right: -18px; }
+.sticker.grabbing .edge, .sticker.held .edge { cursor: grabbing; }
 
 /* ---------- phones: the label stands upright, tabs top and bottom ---------- */
 @media (max-width: 560px) {
@@ -205,7 +204,6 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
   h1 { gap: 10px; font-size: clamp(34px, 11vw, 48px); }
   .lede { font-size: 15px; }
   .small { font-size: 12px; letter-spacing: 0.05em; }
-  .grab { width: 108px; height: 108px; left: -20px; bottom: -20px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .flip, .glow span { animation: none; }
@@ -217,8 +215,9 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
 
 <div class="glass" aria-hidden="true"></div>
 
+<canvas class="residue" aria-hidden="true"></canvas>
 <main class="label-wrap">
-  <canvas class="residue" aria-hidden="true"></canvas>
+ <div class="sticker">
   <div class="label-shadow">
     <div class="label">
       <canvas class="damage" aria-hidden="true"></canvas>
@@ -255,33 +254,43 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
         </svg>
       </div>
     </div>
+    <canvas class="back" aria-hidden="true"></canvas>
   </div>
 
-  <canvas class="fx" aria-hidden="true"></canvas>
-  <div class="grab" aria-hidden="true" title="Peel the corner"></div>
+  <i class="edge t" aria-hidden="true"></i><i class="edge r" aria-hidden="true"></i><i class="edge b" aria-hidden="true"></i><i class="edge l" aria-hidden="true"></i>
+ </div>
 </main>
+<canvas class="fx" aria-hidden="true"></canvas>
 <script>
 /* Peelable tamper label.
-   The bottom-left corner follows the pointer. The fold line is the perpendicular bisector of the
-   drag, the lifted part rolls over a small cylinder and then lies flat, face down.
-   Anything ever lifted leaves white VOID residue on the glass and is scarred when it goes back down. */
+   Grab any edge or corner. A fingernail first raises a small, tightly creased lip; pull further and the
+   label peels along a fold that rolls over a small cylinder and lies face down. Peel it all the way off
+   and it comes away in your hand: drop it anywhere and it sticks at the angle it landed.
+   Whatever is lifted leaves white VOID residue on the glass, loses that glue, and is scarred for good. */
 (() => {
+  const body = document.body;
   const wrap = document.querySelector('.label-wrap');
+  const sticker = wrap.querySelector('.sticker');
   const label = wrap.querySelector('.label');
-  const residueC = wrap.querySelector('.residue');
-  const fxC = wrap.querySelector('.fx');
-  const damageC = label.querySelector('.damage');
-  const grab = wrap.querySelector('.grab');
+  const damageC = wrap.querySelector('.damage');
+  const backC = wrap.querySelector('.back');
+  const residueC = document.querySelector('.residue');
+  const fxC = document.querySelector('.fx');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const PI = Math.PI, M = 150, RADIUS = 10;
+  const PI = Math.PI, RADIUS = 10, PICK = 14, BIG = 6000;
   const norm3 = a => { const l = Math.hypot(a[0], a[1], a[2]); return a.map(x => x / l); };
   const LIGHT = norm3([-0.35, -0.55, 0.76]);
   const HALF = norm3([LIGHT[0], LIGHT[1], LIGHT[2] + 1]);
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const rot = (p, th) => { const c = Math.cos(th), s = Math.sin(th); return { x: p.x * c - p.y * s, y: p.x * s + p.y * c }; };
 
-  let W = 0, H = 0, dpr = 1;
-  let v = { x: 0, y: 0 }, rest = { x: 0, y: 0 };
-  let tex = null, mask = null, scars = null, sil = null;
-  let dragging = false, off = null, anim = 0, touched = false, queued = false, peels = 0;
+  let W = 0, H = 0, dpr = 1, O = { x: 0, y: 0 };
+  let T = { x: 0, y: 0, th: 0 };          // where the sticker sits: page = T + R(th) * local
+  let cur = null;                          // current lift: { C, e, ce, n, D, q, p0, crimped }
+  let hold = null;                         // when fully peeled: { C, t, phi, last }
+  let mode = 'idle';                       // idle | peel | held
+  let tex = null, faceMask = null, scars = null, sil = null, stamps = [];
+  let anim = 0, flipAnim = 0, touched = false, queued = false, peels = 0;
 
   const rng = seed => () => {
     seed = seed + 0x6D2B79F5 | 0;
@@ -292,24 +301,17 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
   const px = n => Math.max(1, Math.round(n * dpr));
   const makeCanvas = (w, h) => { const c = document.createElement('canvas'); c.width = px(w); c.height = px(h); return c; };
   const fit = (c, w, h) => { c.width = px(w); c.height = px(h); c.style.width = w + 'px'; c.style.height = h + 'px'; };
-  const roundRect = ctx => {
-    ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(0, 0, W, H, RADIUS); else ctx.rect(0, 0, W, H);
-  };
+  const carry = old => { const c = makeCanvas(W, H); if (old) c.getContext('2d').drawImage(old, 0, 0, c.width, c.height); return c; };
+  const roundRect = ctx => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(0, 0, W, H, RADIUS); else ctx.rect(0, 0, W, H); };
+  const poly = (ctx, pts) => { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); };
+  const line = (ctx, pts) => { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); };
+  const corners = () => [{ x: 0, y: 0 }, { x: W, y: 0 }, { x: W, y: H }, { x: 0, y: H }];
+  const origin = () => { const a = wrap.getBoundingClientRect(), b = body.getBoundingClientRect(); return { x: a.left - b.left, y: a.top - b.top }; };
+  const setBase = (ctx, t = T) => { ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.translate(O.x + t.x, O.y + t.y); ctx.rotate(t.th); };
 
   /* ---------- textures, built once per size ---------- */
-  function regions() {
-    const lr = label.getBoundingClientRect();
-    return [...label.querySelectorAll('.tab, .film')].map(el => {
-      const r = el.getBoundingClientRect();
-      return { tab: el.classList.contains('tab'), x: r.left - lr.left, y: r.top - lr.top, w: r.width, h: r.height };
-    });
-  }
-
   function build() {
     const rand = rng(20261116);
-
-    // The VOID lettering the adhesive leaves behind. Transfer is never clean, so it is broken up.
     const voids = makeCanvas(W, H), vc = voids.getContext('2d');
     vc.scale(dpr, dpr);
     vc.fillStyle = '#FFFFFF';
@@ -324,6 +326,7 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
       for (let x = -ext + (row % 2 ? sx / 2 : 0); x < ext; x += sx) vc.fillText('VOID', x, y);
     }
     vc.restore();
+    // adhesive never transfers cleanly
     vc.globalCompositeOperation = 'destination-out';
     for (let i = 0, n = W * H / 28; i < n; i++) {
       vc.globalAlpha = 0.45 + rand() * 0.55;
@@ -336,9 +339,10 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
     vc.globalAlpha = 1;
     vc.globalCompositeOperation = 'source-over';
 
-    const regs = regions();
+    const regs = [...label.querySelectorAll('.tab, .film')].map(el => (
+      { tab: el.classList.contains('tab'), x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight }));
 
-    // Underside: white glue with VOID-shaped gaps where it stayed on the glass; the film shows through the gaps.
+    // underside: white glue, with VOID-shaped gaps where it stayed on the glass
     const under = makeCanvas(W, H), uc = under.getContext('2d');
     uc.scale(dpr, dpr);
     for (const r of regs) { uc.fillStyle = r.tab ? '#C24B2B' : '#A9ADB3'; uc.fillRect(r.x - 1, r.y - 1, r.w + 2, r.h + 2); }
@@ -356,55 +360,79 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
     uc.setTransform(1, 0, 0, 1, 0, 0);
     uc.drawImage(glue, 0, 0);
 
-    // Front face, only seen on the thin rising edge of the curl.
+    // front face, seen only on the thin rising edge of the curl
     const front = makeCanvas(W, H), fc = front.getContext('2d');
     fc.scale(dpr, dpr);
     for (const r of regs) { fc.fillStyle = r.tab ? '#E9572F' : '#C9CCCF'; fc.fillRect(r.x - 1, r.y - 1, r.w + 2, r.h + 2); }
 
     tex = { voids, under, front };
+    fit(backC, W, H);
+    backC.getContext('2d').drawImage(under, 0, 0);
   }
 
-  const carry = old => {
-    const c = makeCanvas(W, H);
-    if (old) c.getContext('2d').drawImage(old, 0, 0, c.width, c.height);
+  const restD = c => Math.min(W, H) * 0.045 + 6 + Math.min(peels, 5) * 3;
+  function hintCorner() {
+    const c = { C: { x: 0, y: H }, e: { x: Math.SQRT1_2, y: -Math.SQRT1_2 }, ce: [{ x: 1, y: 0 }, { x: 0, y: -1 }], q: 0, crimped: true };
+    c.n = c.e; c.D = restD(c);
     return c;
-  };
+  }
 
   function setup() {
     const w = label.offsetWidth, h = label.offsetHeight;
     if (!w || !h) return;
+    const resized = w !== W || h !== H;
     dpr = Math.min(2, window.devicePixelRatio || 1);
     W = w; H = h;
-    fit(residueC, W, H);
-    fit(damageC, W, H);
-    fxC.style.left = fxC.style.top = -M + 'px';
-    fit(fxC, W + 2 * M, H + 2 * M);
-    sil = makeCanvas(W + 2 * M, H + 2 * M);
-    mask = carry(mask);
-    scars = carry(scars);
-    build();
-    const base = Math.min(W, H) * 0.045 + 6;
-    rest = { x: base + Math.min(peels, 5) * 3, y: -(base * 0.8 + Math.min(peels, 5) * 2.4) };
-    if (!dragging) v = { ...rest };
+    const bw = body.clientWidth, bh = body.clientHeight;
+    fit(residueC, bw, bh);
+    fit(fxC, bw, bh);
+    sil = makeCanvas(bw, bh);
+    if (resized) {
+      fit(damageC, W, H);
+      faceMask = carry(faceMask);
+      scars = carry(scars);
+      for (const s of stamps) { s.mask = carry(s.mask); s.prior = carry(s.prior); s.out = carry(s.out); }
+      build();
+      if (mode === 'idle') cur = touched ? null : hintCorner();
+    }
+    applyTransform();
     render(false);
   }
 
   /* ---------- geometry ---------- */
-  function geom(vx, vy) {
-    const D = Math.hypot(vx, vy);
-    if (D < 0.75) return null;
-    const n = { x: vx / D, y: vy / D };
-    const r0 = Math.min(22, Math.max(10, Math.min(W, H) * 0.07));
+  function geom(C, n, D) {
+    const r0 = clamp(Math.min(W, H) * 0.07, 10, 22);
     const r = Math.min(r0, Math.max(1.5, D * 0.17));
-    const a = (D + PI * r) / 2;          // where the label still grips, measured from the corner along n
-    const C = { x: 0, y: H };
-    const m = a + C.x * n.x + C.y * n.y; // so that depth d(X) = m - X·n, positive on the lifted side
-    return { D, n, r, a, C, m, K: { x: C.x + a * n.x, y: C.y + a * n.y } };
+    const a = (D + PI * r) / 2;                 // where the label still grips, from the grab point along n
+    let ex = 0;                                 // how much deeper than the grab point the lift reaches
+    for (const X of corners()) ex = Math.max(ex, (C.x - X.x) * n.x + (C.y - X.y) * n.y);
+    return { D, n, r, a, C, m: a + C.x * n.x + C.y * n.y, dmax: a + ex, K: { x: C.x + a * n.x, y: C.y + a * n.y } };
   }
 
-  // Polygon of the label that is still stuck down (half-plane cut of the rectangle).
+  // A sticker only lifts where it has been pulled: turn the fold toward the edge's inward
+  // direction until the lift is no wider than the pull can account for.
+  function constrain(C, e, v) {
+    const L = Math.hypot(v.x, v.y);
+    if (L < 0.5) return { n: e, D: 0 };
+    const nd = { x: v.x / L, y: v.y / L };
+    const test = b => {
+      let x = nd.x * (1 - b) + e.x * b, y = nd.y * (1 - b) + e.y * b;
+      const l = Math.hypot(x, y) || 1; x /= l; y /= l;
+      const D = Math.max(0, v.x * x + v.y * y), g = geom(C, { x, y }, D);
+      return { ok: g.dmax - g.a <= 1.6 * g.a + 6, n: { x, y }, D };
+    };
+    let best = test(0);
+    if (best.ok) return best;
+    best = test(1);
+    for (let lo = 0, hi = 1, i = 0; i < 12; i++) {
+      const mid = (lo + hi) / 2, t = test(mid);
+      if (t.ok) { hi = mid; best = t; } else lo = mid;
+    }
+    return best;
+  }
+
   function stuckPolygon(G) {
-    const pts = [{ x: 0, y: 0 }, { x: W, y: 0 }, { x: W, y: H }, { x: 0, y: H }], out = [];
+    const pts = corners(), out = [];
     const f = P => P.x * G.n.x + P.y * G.n.y - G.m;
     for (let i = 0; i < 4; i++) {
       const A = pts[i], B = pts[(i + 1) % 4], fa = f(A), fb = f(B);
@@ -413,10 +441,10 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
     }
     return out;
   }
+  const area = pts => { let s = 0; for (let i = 0; i < pts.length; i++) { const a = pts[i], b = pts[(i + 1) % pts.length]; s += a.x * b.y - b.x * a.y; } return Math.abs(s) / 2; };
 
-  // A band of the label between two depths from the grip line.
   function band(ctx, G, d0, d1) {
-    const L = W + H + 2 * M, t = { x: -G.n.y, y: G.n.x };
+    const L = BIG, t = { x: -G.n.y, y: G.n.x };
     const q = d => ({ x: G.C.x + (G.a - d) * G.n.x, y: G.C.y + (G.a - d) * G.n.y });
     const A = q(d0), B = q(d1);
     ctx.beginPath();
@@ -427,20 +455,18 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
     ctx.closePath();
   }
 
-  // Slice the lifted part: thin strips around the roll, then one flat face-down piece.
   function strips(G) {
-    const out = [], roll = PI * G.r, cyl = Math.min(G.a, roll);
+    const out = [], roll = PI * G.r, cyl = Math.min(G.dmax, roll);
     const N = Math.min(44, Math.max(8, Math.ceil(cyl / 1.4)));
     const p = d => d < roll ? G.r * Math.sin(d / G.r) : -(d - roll);
     for (let i = 0; i < N; i++) {
       const d0 = cyl * i / N, d1 = cyl * (i + 1) / N;
       out.push({ d0, d1, p0: p(d0), p1: p(d1), th: (d0 + d1) / 2 / G.r });
     }
-    if (G.a > roll) out.push({ d0: roll, d1: G.a + 4, p0: 0, p1: -(G.a + 4 - roll), th: PI });
+    if (G.dmax > roll) out.push({ d0: roll, d1: G.dmax + 4, p0: 0, p1: -(G.dmax + 4 - roll), th: PI });
     return out;
   }
 
-  // Affine map taking a strip of the flat label to where it sits once lifted.
   function stripTransform(G, s) {
     const k = (s.p1 - s.p0) / (s.d1 - s.d0), q = 1 - k, n = G.n;
     const a = 1 - q * n.x * n.x, b = -q * n.x * n.y, d = 1 - q * n.y * n.y;
@@ -449,7 +475,7 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
   }
 
   function shade(G, s) {
-    const n = G.n, th = s.th, sn = Math.sin(th), cs = Math.cos(th);
+    const n = rot(G.n, T.th), th = s.th, sn = Math.sin(th), cs = Math.cos(th);
     const front = th < PI / 2;
     const N = front ? [-sn * n.x, -sn * n.y, cs] : [sn * n.x, sn * n.y, -cs];
     const diff = Math.max(0, N[0] * LIGHT[0] + N[1] * LIGHT[1] + N[2] * LIGHT[2]);
@@ -459,24 +485,23 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
   }
 
   function drawStrip(ctx, G, s, silhouette) {
-    const [a, b, c, d, e, f] = stripTransform(G, s);
     ctx.save();
-    ctx.setTransform(dpr * a, dpr * b, dpr * c, dpr * d, dpr * (e + M), dpr * (f + M));
+    setBase(ctx);
+    ctx.transform(...stripTransform(G, s));
     roundRect(ctx); ctx.clip();
     band(ctx, G, s.d0 - 0.6, s.d1 + 0.6); ctx.clip();
-    const all = () => ctx.fillRect(-M, -M, W + 2 * M, H + 2 * M);
-    if (silhouette) {
-      ctx.fillStyle = '#000'; all();
-    } else {
+    const all = () => ctx.fillRect(-BIG, -BIG, 2 * BIG, 2 * BIG);
+    if (silhouette) { ctx.fillStyle = '#000'; all(); }
+    else {
       const sh = shade(G, s);
       ctx.drawImage(sh.front ? tex.front : tex.under, 0, 0, W, H);
       if (sh.bri < 1) { ctx.fillStyle = `rgba(0,0,0,${Math.min(0.78, 1 - sh.bri)})`; all(); }
       else if (sh.bri > 1.01) { ctx.fillStyle = `rgba(255,255,255,${Math.min(0.3, sh.bri - 1)})`; all(); }
       if (sh.spec > 0.01) { ctx.fillStyle = `rgba(255,255,255,${sh.spec})`; all(); }
-      if (s.th >= PI && G.a > PI * G.r + 4) {
-        // the flat flap is never perfectly flat: light falls off toward the free corner
+      if (s.th >= PI) {
+        // the flat part is never perfectly flat: light falls off toward the free end
         const q = d => ({ x: G.C.x + (G.a - d) * G.n.x, y: G.C.y + (G.a - d) * G.n.y });
-        const A = q(PI * G.r), B = q(G.a);
+        const A = q(PI * G.r), B = q(G.dmax);
         const g = ctx.createLinearGradient(A.x, A.y, B.x, B.y);
         g.addColorStop(0, 'rgba(255,255,255,0.10)');
         g.addColorStop(0.35, 'rgba(0,0,0,0)');
@@ -487,33 +512,102 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
     ctx.restore();
   }
 
+  /* ---------- the fingernail stage: a small lip with tight creases ---------- */
+  function pickShape(c, q) {
+    const C = c.C;
+    if (c.ce) {
+      const [e1, e2] = c.ce, g = 6 + 11 * q;
+      const A = { x: C.x + g * e1.x, y: C.y + g * e1.y }, B = { x: C.x + g * e2.x, y: C.y + g * e2.y };
+      const f = k => [{ x: A.x + k * g * e2.x, y: A.y + k * g * e2.y }, { x: B.x + k * g * e1.x, y: B.y + k * g * e1.y }];
+      return { notch: [C, A, B], lip: [A, B, { x: C.x + g * (e1.x + e2.x), y: C.y + g * (e1.y + e2.y) }], edge: [A, B], folds: [f(0.32), f(0.62)] };
+    }
+    const e = c.e, t = { x: -e.y, y: e.x }, w = 9 + 11 * q, h = 2 + 6 * q;
+    const par = k => {
+      const out = [];
+      for (let i = 0; i <= 12; i++) {
+        const s = -w + 2 * w * i / 12, d = k * h * (1 - (s / w) * (s / w));
+        out.push({ x: C.x + s * t.x + d * e.x, y: C.y + s * t.y + d * e.y });
+      }
+      return out;
+    };
+    const p1 = par(1);
+    return { notch: p1, lip: p1.concat(par(2).reverse()), edge: p1, folds: [par(1.33), par(1.66)] };
+  }
+
+  function drawLip(ctx, sh) {
+    ctx.save();
+    setBase(ctx);
+    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 5 * dpr; ctx.shadowOffsetX = 1.5 * dpr; ctx.shadowOffsetY = 2 * dpr;
+    poly(ctx, sh.lip); ctx.fillStyle = '#E9E8E3'; ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.lineCap = 'round';
+    for (const f of sh.folds) {
+      line(ctx, f); ctx.strokeStyle = 'rgba(0,0,0,0.38)'; ctx.lineWidth = 0.9; ctx.stroke();
+      ctx.save(); ctx.translate(0.7, 0.7); line(ctx, f); ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 0.7; ctx.stroke(); ctx.restore();
+    }
+    line(ctx, sh.edge); ctx.strokeStyle = 'rgba(0,0,0,0.45)'; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.restore();
+  }
+
+  function crimpScars(c, q) {
+    const sh = pickShape(c, q), ctx = scars.getContext('2d');
+    ctx.save();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    roundRect(ctx); ctx.clip();
+    ctx.lineCap = 'round';
+    for (const f of [sh.edge, ...sh.folds]) {
+      line(ctx, f); ctx.strokeStyle = 'rgba(0,0,0,0.26)'; ctx.lineWidth = 0.9; ctx.stroke();
+      ctx.save(); ctx.translate(0.7, 0.7); line(ctx, f); ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 0.7; ctx.stroke(); ctx.restore();
+    }
+    ctx.restore();
+  }
+
   /* ---------- residue on the glass, scars on the label ---------- */
-  function grow(G) {
-    const c = mask.getContext('2d');
-    c.save();
-    c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    roundRect(c); c.clip();
-    band(c, G, 0, G.a + 4);
-    c.fillStyle = '#000';
-    c.fill();
-    c.restore();
+  function stamp() {
+    let s = stamps[stamps.length - 1];
+    if (!s || s.x !== T.x || s.y !== T.y || s.th !== T.th) {
+      // glue that already came off somewhere else cannot come off again here
+      s = { x: T.x, y: T.y, th: T.th, mask: makeCanvas(W, H), out: makeCanvas(W, H), prior: carry(faceMask) };
+      stamps.push(s);
+    }
+    return s;
+  }
+
+  function grow(path) {
+    const st = stamp();
+    for (const cv of [st.mask, faceMask]) {
+      const c = cv.getContext('2d');
+      c.save();
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      roundRect(c); c.clip();
+      path(c);
+      c.fillStyle = '#000';
+      c.fill();
+      c.restore();
+    }
+    const m = st.mask.getContext('2d');
+    m.save(); m.setTransform(1, 0, 0, 1, 0, 0); m.globalCompositeOperation = 'destination-out'; m.drawImage(st.prior, 0, 0); m.restore();
+    const o = st.out.getContext('2d');
+    o.setTransform(1, 0, 0, 1, 0, 0);
+    o.globalCompositeOperation = 'source-over';
+    o.clearRect(0, 0, st.out.width, st.out.height);
+    o.drawImage(st.mask, 0, 0);
+    o.globalCompositeOperation = 'source-in';
+    o.drawImage(tex.voids, 0, 0);
   }
 
   function paintMarks() {
     const r = residueC.getContext('2d');
-    r.globalCompositeOperation = 'source-over';
+    r.setTransform(1, 0, 0, 1, 0, 0);
     r.clearRect(0, 0, residueC.width, residueC.height);
-    r.drawImage(mask, 0, 0);
-    r.globalCompositeOperation = 'source-in';
-    r.drawImage(tex.voids, 0, 0);
-    r.globalCompositeOperation = 'source-over';
+    for (const s of stamps) { setBase(r, s); r.drawImage(s.out, 0, 0, W, H); }
 
-    // The face of a tamper label shows VOID wherever it has been lifted.
+    // the face of a tamper label shows VOID wherever it has been lifted
     const d = damageC.getContext('2d');
     d.globalCompositeOperation = 'source-over';
     d.globalAlpha = 1;
     d.clearRect(0, 0, damageC.width, damageC.height);
-    d.drawImage(mask, 0, 0);
+    d.drawImage(faceMask, 0, 0);
     d.globalCompositeOperation = 'source-in';
     d.globalAlpha = 0.42;
     d.drawImage(tex.voids, 0, 0);
@@ -522,14 +616,32 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
     d.drawImage(scars, 0, 0);
   }
 
+  function bubble(c, x, y, r) {
+    const g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(255,255,255,0.04)');
+    g.addColorStop(0.72, 'rgba(255,255,255,0.12)');
+    g.addColorStop(0.93, 'rgba(255,255,255,0.5)');
+    g.addColorStop(1, 'rgba(0,0,0,0.18)');
+    c.fillStyle = g;
+    c.beginPath(); c.arc(x, y, r, 0, 2 * PI); c.fill();
+    c.fillStyle = 'rgba(255,255,255,0.75)';
+    c.beginPath(); c.arc(x - r * 0.35, y - r * 0.38, Math.max(0.6, r * 0.22), 0, 2 * PI); c.fill();
+    c.strokeStyle = 'rgba(0,0,0,0.16)'; c.lineWidth = 0.8;
+    c.beginPath(); c.arc(x + 0.5, y + 0.6, r, 0.1 * PI, 0.9 * PI); c.stroke();
+  }
+  function wrinkle(c, x, y, ang, len) {
+    c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(ang) * len, y + Math.sin(ang) * len);
+    c.strokeStyle = 'rgba(0,0,0,0.13)'; c.lineWidth = 0.8; c.stroke();
+    c.beginPath(); c.moveTo(x + 0.8, y - 0.6); c.lineTo(x + 0.8 + Math.cos(ang) * len, y - 0.6 + Math.sin(ang) * len);
+    c.strokeStyle = 'rgba(255,255,255,0.32)'; c.lineWidth = 0.7; c.stroke();
+  }
+
   function addScars(G) {
     const c = scars.getContext('2d'), rand = Math.random;
     const t = { x: -G.n.y, y: G.n.x }, L = W + H;
     c.save();
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
     roundRect(c); c.clip();
-
-    // a crease where it was bent hardest
     const crease = (offset, color, width) => {
       c.beginPath();
       for (let s = -L, first = true; s <= L; s += 5, first = false) {
@@ -541,72 +653,71 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
     };
     crease(0.9, 'rgba(0,0,0,0.22)', 1.1);
     crease(-0.5, 'rgba(255,255,255,0.5)', 0.9);
-
-    // air trapped when it went back down
-    const count = 3 + Math.floor(rand() * 5);
-    for (let i = 0; i < count; i++) {
-      const s = (rand() - 0.5) * Math.min(L, G.a * 1.8);
-      const u = 5 + rand() * G.a * 0.75;
-      const x = G.K.x + s * t.x - u * G.n.x, y = G.K.y + s * t.y - u * G.n.y;
-      const r = 2 + rand() * 5.5;
-      const g = c.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, 'rgba(255,255,255,0.04)');
-      g.addColorStop(0.72, 'rgba(255,255,255,0.12)');
-      g.addColorStop(0.93, 'rgba(255,255,255,0.5)');
-      g.addColorStop(1, 'rgba(0,0,0,0.18)');
-      c.fillStyle = g;
-      c.beginPath(); c.arc(x, y, r, 0, 2 * PI); c.fill();
-      c.fillStyle = 'rgba(255,255,255,0.75)';
-      c.beginPath(); c.arc(x - r * 0.35, y - r * 0.38, Math.max(0.6, r * 0.22), 0, 2 * PI); c.fill();
-      c.strokeStyle = 'rgba(0,0,0,0.16)'; c.lineWidth = 0.8;
-      c.beginPath(); c.arc(x + 0.5, y + 0.6, r, 0.1 * PI, 0.9 * PI); c.stroke();
+    const base = Math.atan2(G.n.y, G.n.x);
+    for (let i = 0, k = 3 + Math.floor(rand() * 5); i < k; i++) {
+      const s = (rand() - 0.5) * Math.min(L, G.dmax * 1.8), u = 5 + rand() * G.dmax * 0.75;
+      bubble(c, G.K.x + s * t.x - u * G.n.x, G.K.y + s * t.y - u * G.n.y, 2 + rand() * 5.5);
     }
-
-    // a few fine wrinkles running out from the old corner
-    for (let i = 0; i < 2 + Math.floor(rand() * 3); i++) {
-      const sx = rand() * Math.min(W, G.a * 0.8), sy = H - rand() * Math.min(H, G.a * 0.6);
-      const len = 8 + rand() * 26, ang = -PI / 4 + (rand() - 0.5) * 1.2;
-      c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx + Math.cos(ang) * len, sy + Math.sin(ang) * len);
-      c.strokeStyle = 'rgba(0,0,0,0.13)'; c.lineWidth = 0.8; c.stroke();
-      c.beginPath(); c.moveTo(sx + 0.8, sy - 0.6); c.lineTo(sx + 0.8 + Math.cos(ang) * len, sy - 0.6 + Math.sin(ang) * len);
-      c.strokeStyle = 'rgba(255,255,255,0.32)'; c.lineWidth = 0.7; c.stroke();
+    for (let i = 0, k = 2 + Math.floor(rand() * 3); i < k; i++) {
+      const s = (rand() - 0.5) * Math.min(L, G.dmax * 1.4), u = rand() * G.dmax * 0.8;
+      wrinkle(c, G.K.x + s * t.x - u * G.n.x, G.K.y + s * t.y - u * G.n.y, base + (rand() - 0.5) * 1.3, 8 + rand() * 26);
     }
     c.restore();
   }
 
+  // a sticker laid down by hand traps air and wrinkles all over
+  function addDropScars() {
+    const c = scars.getContext('2d'), rand = Math.random;
+    c.save();
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    roundRect(c); c.clip();
+    for (let i = 0, k = 7 + Math.floor(rand() * 7); i < k; i++) bubble(c, rand() * W, rand() * H, 2 + rand() * 7);
+    for (let i = 0, k = 3 + Math.floor(rand() * 4); i < k; i++) wrinkle(c, rand() * W, rand() * H, rand() * PI, 14 + rand() * 46);
+    c.restore();
+  }
+
   /* ---------- frame ---------- */
-  function render(growMask) {
+  const polyCss = pts => pts.map(p => `${p.x.toFixed(2)}px ${p.y.toFixed(2)}px`).join(',');
+
+  function render(growing) {
     if (!tex) return;
-    const G = geom(v.x, v.y);
-
-    if (!G) label.style.clipPath = '';
-    else {
-      const pts = stuckPolygon(G);
-      label.style.clipPath = pts.length > 2
-        ? `polygon(${pts.map(p => `${p.x.toFixed(2)}px ${p.y.toFixed(2)}px`).join(',')})`
-        : 'polygon(0 0, 0 0, 0 0)';
-      if (growMask) grow(G);
-    }
-    paintMarks();
-
+    O = origin();
     const ctx = fxC.getContext('2d');
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, fxC.width, fxC.height);
+    let G = null, lip = null;
+
+    if (mode === 'held' || !cur) label.style.clipPath = '';
+    else if (cur.D < 0.75) {
+      if (cur.q > 0.02) {
+        lip = pickShape(cur, cur.q);
+        const r = corners();
+        label.style.clipPath = `polygon(evenodd, ${polyCss(r.concat([r[0]], lip.notch, [lip.notch[0]]))})`;
+        if (growing) grow(c => poly(c, lip.notch));
+      } else label.style.clipPath = '';
+    } else {
+      G = geom(cur.C, cur.n, cur.D);
+      const pts = stuckPolygon(G);
+      label.style.clipPath = pts.length > 2 ? `polygon(${polyCss(pts)})` : 'polygon(0 0, 0 0, 0 0)';
+      if (growing) grow(c => band(c, G, 0, G.dmax + 4));
+    }
+    paintMarks();
+    if (lip) drawLip(ctx, lip);
     if (!G) return;
     const list = strips(G);
 
     // dark pocket under the roll
     ctx.save();
-    ctx.setTransform(dpr, 0, 0, dpr, dpr * M, dpr * M);
+    setBase(ctx);
     roundRect(ctx); ctx.clip();
-    band(ctx, G, 0, G.a + 4); ctx.clip();
+    band(ctx, G, 0, G.dmax + 4); ctx.clip();
     const k = G.K, reach = G.r * 2.6;
     const pocket = ctx.createLinearGradient(k.x, k.y, k.x - G.n.x * reach, k.y - G.n.y * reach);
     pocket.addColorStop(0, 'rgba(0,0,0,0.55)');
     pocket.addColorStop(0.4, 'rgba(0,0,0,0.2)');
     pocket.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = pocket;
-    ctx.fillRect(-M, -M, W + 2 * M, H + 2 * M);
+    ctx.fillRect(-BIG, -BIG, 2 * BIG, 2 * BIG);
     ctx.restore();
 
     // shadow cast by the lifted flap
@@ -624,83 +735,188 @@ h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
     ctx.drawImage(sil, -20000, 0);
     ctx.restore();
 
-    // the flap itself
     for (const s of list) drawStrip(ctx, G, s, false);
   }
 
   function schedule() {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(() => { queued = false; render(true); });
+    requestAnimationFrame(() => { queued = false; render(mode === 'peel'); });
+  }
+
+  function applyTransform() {
+    let s = `translate(${T.x.toFixed(2)}px,${T.y.toFixed(2)}px) rotate(${T.th.toFixed(5)}rad)`;
+    let back = false;
+    if (mode === 'held' && hold) {
+      const C = hold.C;
+      s += ` translate(${C.x}px,${C.y}px) rotate3d(${hold.t.x.toFixed(4)},${hold.t.y.toFixed(4)},0,${hold.phi.toFixed(2)}deg) scale(1.03) translate(${-C.x}px,${-C.y}px)`;
+      back = hold.phi > 90;
+    }
+    sticker.style.transform = s;
+    backC.style.display = back ? 'block' : 'none';
+    label.style.visibility = back ? 'hidden' : 'visible';
   }
 
   /* ---------- interaction ---------- */
-  function animateTo(to, dur, after) {
+  function animateD(to, dur, after) {
     cancelAnimationFrame(anim);
-    const from = { ...v }, t0 = performance.now();
+    const c = cur, from = c.D, t0 = performance.now();
     const step = now => {
+      if (cur !== c) return;
       const t = Math.min(1, (now - t0) / Math.max(1, dur)), e = 1 - Math.pow(1 - t, 3);
-      v = { x: from.x + (to.x - from.x) * e, y: from.y + (to.y - from.y) * e };
+      // as it goes back down it can only stay lifted where it is still being held up
+      const k = constrain(c.C, c.e, { x: c.n.x * (from + (to - from) * e), y: c.n.y * (from + (to - from) * e) });
+      c.n = k.n; c.D = k.D;
       render(false);
       if (t < 1) anim = requestAnimationFrame(step); else if (after) after();
     };
     anim = requestAnimationFrame(step);
   }
 
-  function restick() {
-    const G = geom(v.x, v.y);
-    if (G && G.D > 28) { addScars(G); peels++; }
-    // each time it loses a little tack, so the corner sits a touch higher
-    const base = Math.min(W, H) * 0.045 + 6;
-    rest = { x: base + Math.min(peels, 5) * 3, y: -(base * 0.8 + Math.min(peels, 5) * 2.4) };
-    animateTo(rest, reduce ? 1 : 460);
+  const world = e => { const r = wrap.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const local = e => { const w = world(e); return rot({ x: w.x - T.x, y: w.y - T.y }, -T.th); };
+
+  function grabPoint(p) {
+    const q = { x: clamp(p.x, 0, W), y: clamp(p.y, 0, H) };
+    const d = [q.y, W - q.x, H - q.y, q.x], i = d.indexOf(Math.min(...d));   // top, right, bottom, left
+    const C = [{ x: q.x, y: 0 }, { x: W, y: q.y }, { x: q.x, y: H }, { x: 0, y: q.y }][i];
+    const e = [{ x: 0, y: 1 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 1, y: 0 }][i];
+    const snap = Math.min(30, Math.min(W, H) * 0.2);
+    for (const X of corners()) {
+      if (Math.hypot(C.x - X.x, C.y - X.y) <= snap) {
+        const e1 = { x: X.x ? -1 : 1, y: 0 }, e2 = { x: 0, y: X.y ? -1 : 1 };
+        return { C: X, e: { x: e1.x * Math.SQRT1_2, y: e2.y * Math.SQRT1_2 }, ce: [e1, e2] };
+      }
+    }
+    return { C, e, ce: null };
   }
 
-  const local = e => { const r = label.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  function detach(e) {
+    grow(c => { c.beginPath(); c.rect(0, 0, W, H); });
+    const w = world(e), C = cur.C;
+    hold = { C, t: { x: -cur.n.y, y: cur.n.x }, phi: reduce ? 0 : 180, last: w };
+    cur = null;
+    mode = 'held';
+    peels++;
+    const rc = rot(C, T.th);
+    T = { x: w.x - rc.x, y: w.y - rc.y, th: T.th };
+    sticker.classList.add('held');
+    applyTransform();
+    render(false);
+    // it comes away face down, then turns over in the hand
+    const h = hold, t0 = performance.now();
+    const step = now => {
+      if (hold !== h) return;
+      const t = Math.min(1, (now - t0) / 320);
+      h.phi = 180 * (1 - (1 - Math.pow(1 - t, 3)));
+      applyTransform();
+      if (t < 1) flipAnim = requestAnimationFrame(step);
+    };
+    if (!reduce) flipAnim = requestAnimationFrame(step);
+  }
 
-  grab.addEventListener('pointerdown', e => {
-    if (!W) return;
+  function onDown(e) {
+    if (!W || mode !== 'idle') return;
     e.preventDefault();
     touched = true;
-    dragging = true;
     cancelAnimationFrame(anim);
-    try { grab.setPointerCapture(e.pointerId); } catch (_) {}
-    const p = local(e);
-    off = { x: p.x - v.x, y: p.y - (H + v.y) };
-    grab.classList.add('held');
-  });
-  grab.addEventListener('pointermove', e => {
-    if (!dragging) return;
-    const p = local(e);
-    let x = Math.max(0, p.x - off.x), y = Math.min(0, p.y - off.y - H);
-    const max = Math.hypot(W, H) * 0.78, D = Math.hypot(x, y);
-    if (D > max) { x *= max / D; y *= max / D; }
-    v = { x, y };
-    schedule();
-  });
-  const end = () => {
-    if (!dragging) return;
-    dragging = false;
-    grab.classList.remove('held');
-    restick();
-  };
-  grab.addEventListener('pointerup', end);
-  grab.addEventListener('pointercancel', end);
-  grab.addEventListener('lostpointercapture', end);
+    const p = local(e), g = grabPoint(p);
+    if (cur && cur.D > 0.75 && cur.C.x === g.C.x && cur.C.y === g.C.y) {
+      // picking up a corner that is already lifted
+      const k = 1 + PICK / cur.D;
+      cur.p0 = { x: p.x - cur.n.x * cur.D * k, y: p.y - cur.n.y * cur.D * k };
+    } else cur = { ...g, n: g.e, D: 0, q: 0, p0: p, crimped: false };
+    mode = 'peel';
+    sticker.classList.add('grabbing');
+    sticker.classList.remove('settle');
+    render(false);
+  }
 
-  // until someone tries it, the corner lifts now and then
+  function onMove(e) {
+    if (mode === 'peel') {
+      const p = local(e), c = cur, r = { x: p.x - c.p0.x, y: p.y - c.p0.y }, L = Math.hypot(r.x, r.y);
+      let D = 0, n = c.e;
+      if (L > PICK) ({ n, D } = constrain(c.C, c.e, { x: r.x * (1 - PICK / L), y: r.y * (1 - PICK / L) }));
+      c.q = clamp(Math.max(r.x * c.e.x + r.y * c.e.y, c.ce ? L * 0.6 : 0) / PICK, 0, 1);
+      c.D = D;
+      if (D >= 0.75) {
+        c.n = n;
+        if (!c.crimped) { crimpScars(c, 1); c.crimped = true; }
+        const G = geom(c.C, c.n, c.D), pts = stuckPolygon(G);
+        let far = 0;
+        for (const X of corners()) far = Math.max(far, (X.x - c.C.x) * c.n.x + (X.y - c.C.y) * c.n.y);
+        // once the last strip still holding is narrow, it lets go
+        if (pts.length < 3 || area(pts) < 0.4 * W * H || G.a > far - Math.min(W, H) * 0.3) { detach(e); return; }
+      }
+      schedule();
+    } else if (mode === 'held') {
+      // dragged by one point, the rest of the sticker trails behind it
+      const w = world(e), h = hold, d = { x: w.x - h.last.x, y: w.y - h.last.y };
+      h.last = w;
+      const arm = rot({ x: W / 2 - h.C.x, y: H / 2 - h.C.y }, T.th), len = Math.hypot(arm.x, arm.y) || 1;
+      const u = { x: arm.x / len, y: arm.y / len };
+      T.th += clamp(-(u.x * d.y - u.y * d.x) / (Math.max(len, 90) * 1.25), -0.2, 0.2);
+      const rc = rot(h.C, T.th);
+      T.x = w.x - rc.x; T.y = w.y - rc.y;
+      applyTransform();
+    }
+  }
+
+  function onUp() {
+    sticker.classList.remove('grabbing');
+    if (mode === 'peel') {
+      mode = 'idle';
+      const c = cur;
+      if (c.D < 0.75) {
+        if (c.q > 0.3 && !c.crimped) crimpScars(c, c.q);
+        cur = null;
+        render(false);
+      } else {
+        if (c.D > 28) { addScars(geom(c.C, c.n, c.D)); peels++; }
+        // it loses a little tack each time, so it never lies quite flat again
+        // a corner never lies quite flat again; an edge goes back down along its creases
+        animateD(c.ce ? Math.min(c.D, restD(c)) : 0, reduce ? 1 : 460, () => { if (!c.ce && cur === c) { cur = null; render(false); } });
+      }
+    } else if (mode === 'held') {
+      cancelAnimationFrame(flipAnim);
+      mode = 'idle';
+      hold = null;
+      T.th += (Math.random() - 0.5) * 0.06;
+      // keep it on the glass
+      const c = rot({ x: W / 2, y: H / 2 }, T.th), bw = body.clientWidth, bh = body.clientHeight;
+      const hx = Math.abs(W / 2 * Math.cos(T.th)) + Math.abs(H / 2 * Math.sin(T.th)) + 10;
+      const hy = Math.abs(W / 2 * Math.sin(T.th)) + Math.abs(H / 2 * Math.cos(T.th)) + 10;
+      const keep = (v, h, max) => h * 2 > max ? max / 2 : clamp(v, h, max - h);
+      const cx = keep(O.x + T.x + c.x, hx, bw), cy = keep(O.y + T.y + c.y, hy, bh);
+      T.x = cx - O.x - c.x; T.y = cy - O.y - c.y;
+      addDropScars();
+      sticker.classList.remove('held');
+      sticker.classList.add('settle');
+      applyTransform();
+      render(false);
+    }
+  }
+
+  let pid = null;
+  for (const el of wrap.querySelectorAll('.edge')) el.addEventListener('pointerdown', e => { if (pid === null) { onDown(e); if (mode === 'peel') pid = e.pointerId; } });
+  addEventListener('pointermove', e => { if (e.pointerId === pid) onMove(e); }, { passive: true });
+  const up = e => { if (e.pointerId === pid) { pid = null; onUp(); } };
+  addEventListener('pointerup', up);
+  addEventListener('pointercancel', up);
+
+  // until someone tries it, one corner lifts now and then
   function hint() {
-    if (touched || dragging || reduce || !tex) return;
-    const peak = { x: rest.x + 26, y: rest.y - 20 };
-    animateTo(peak, 520, () => { if (!touched) animateTo(rest, 620); });
+    if (touched || mode !== 'idle' || reduce || !tex || !cur) return;
+    const rest = restD(cur);
+    animateD(rest + 30, 520, () => { if (!touched && cur) animateD(rest, 620); });
   }
   setTimeout(hint, 1400);
   setInterval(hint, 4800);
 
-  new ResizeObserver(() => { if (!dragging) setup(); }).observe(label);
+  const ro = new ResizeObserver(() => { if (mode === 'idle') setup(); });
+  ro.observe(label); ro.observe(body);
   setup();
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(setup);
-
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { W = 0; setup(); });
 })();
 </script>
 </body>
