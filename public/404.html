@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>404 · Voids Warranty</title>
+<meta name="description" content="This page has been removed. Error 404.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0D0E11">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 76 76'%3E%3Crect width='76' height='76' rx='14' fill='%23E9572F'/%3E%3Ccircle cx='38' cy='38' r='25' fill='none' stroke='%23F3E83A' stroke-width='6'/%3E%3Cpath d='M20 56L56 20' stroke='%23F3E83A' stroke-width='6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;900&text=%E6%92%95%E6%AF%81%E6%97%A0%E6%95%88%E5%B0%81&display=swap">
+<style>
+/* Layout: a tamper-evident "void if removed" seal label stuck on a full-screen pane of frosted glass,
+   with warm and cool light glowing through from behind.
+   Any edge or corner can be picked at and peeled. Lifting leaves white VOID residue on the glass and
+   VOID-shaped gaps in the glue. Peeled right off, the label can be dropped anywhere and sticks as it lands. */
+:root {
+  --orange: #E9572F;
+  --yellow: #F3E83A;
+  --silver: #C9CCCF;
+  --chip: #EEEFF0;
+  --ink: #141517;
+  --peel: 104px;
+  --radius: 10px;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --cjk: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { min-height: 100%; background: #0D0E11; overflow-x: hidden; }
+body {
+  position: relative;
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 48px 28px;
+  color: var(--ink);
+  font-family: var(--sans);
+  overflow: clip;
+}
+
+/* ---------- light behind the glass ---------- */
+.glow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.glow span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.7;
+  animation: drift 22s ease-in-out infinite alternate;
+}
+.glow .a { width: 46vmax; height: 46vmax; left: -8vmax; top: -10vmax; background: radial-gradient(circle, #E9572F 0%, rgba(233,87,47,0) 68%); }
+.glow .b { width: 50vmax; height: 50vmax; right: -14vmax; bottom: -16vmax; background: radial-gradient(circle, #2F5FD0 0%, rgba(47,95,208,0) 68%); animation-delay: -8s; }
+.glow .c { width: 26vmax; height: 26vmax; right: 18vw; top: 6vh; background: radial-gradient(circle, #F3C43A 0%, rgba(243,196,58,0) 70%); opacity: 0.35; animation-delay: -14s; }
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(4vw, 3vh, 0) scale(1.08); }
+}
+
+/* ---------- the whole screen is frosted glass ---------- */
+.glass {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(118deg, rgba(255,255,255,0) 22%, rgba(255,255,255,0.07) 31%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 64%, rgba(255,255,255,0.04) 70%, rgba(255,255,255,0) 76%),
+    linear-gradient(160deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+  -webkit-backdrop-filter: blur(42px) saturate(160%);
+  backdrop-filter: blur(42px) saturate(160%);
+}
+
+/* ---------- the label ---------- */
+.label-wrap {
+  position: relative;
+  z-index: 1;
+  width: min(900px, 100%);
+}
+.label-shadow {
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.45)) drop-shadow(0 4px 10px rgba(0,0,0,0.22));
+}
+.label {
+  display: flex;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.tab {
+  flex: none;
+  width: clamp(84px, 13vw, 132px);
+  display: grid;
+  place-items: center;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.9 0 0 0 0 0.8 0 0 0 0.10 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E"),
+    var(--orange);
+}
+.tab svg { width: 70%; height: auto; max-width: 92px; }
+.seal-glyph {
+  font-family: var(--cjk);
+  font-weight: 900;
+}
+/* silver tamper film with a glittery speckle */
+.film {
+  flex: 1;
+  min-width: 0;
+  padding: 26px clamp(20px, 3.4vw, 34px) 30px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 3.2 -1.55'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23s)'/%3E%3C/svg%3E"),
+    linear-gradient(120deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 30%, rgba(214,226,240,0.25) 60%, rgba(255,255,255,0) 85%),
+    var(--silver);
+}
+.chip {
+  display: inline-block;
+  padding: 7px 14px 8px;
+  border-radius: 10px;
+  background: var(--chip);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+  text-align: center;
+}
+.chip .cn {
+  display: block;
+  font: 500 15px/1.2 var(--cjk);
+  letter-spacing: 1.1em;
+  margin-right: -1.1em;
+}
+.chip .en {
+  display: block;
+  margin-top: 2px;
+  font: 400 17px/1.15 var(--sans);
+  letter-spacing: 0.04em;
+}
+h1 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 14px 0 12px;
+  font: 700 clamp(34px, 5.6vw, 60px)/1 var(--sans);
+  letter-spacing: -0.01em;
+}
+h1 .warn { flex: none; width: 0.62em; height: 0.62em; }
+.flip {
+  display: inline-block;
+  animation: flip 1.4s ease-in-out infinite;
+}
+@keyframes flip {
+  0%, 35% { transform: rotateY(0deg); }
+  50%, 85% { transform: rotateY(180deg); }
+  100% { transform: rotateY(360deg); }
+}
+.lede {
+  margin: 0;
+  max-width: 54ch;
+  font-size: 16px;
+  line-height: 1.55;
+}
+.small {
+  margin: 10px 0 0;
+  font: 500 13px/1.4 var(--sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.small { display: flex; flex-wrap: wrap; gap: 2px 14px; }
+.small span, .nw { white-space: nowrap; }
+.lede a {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--orange);
+}
+.lede a:hover, .lede a:focus-visible { background: var(--orange); color: #fff; text-decoration-color: transparent; border-radius: 3px; outline: none; }
+
+
+/* ---------- the peel (drawn live by the script at the bottom) ---------- */
+.residue, .fx { position: absolute; left: 0; top: 0; pointer-events: none; }
+.residue { z-index: 0; opacity: 0.94; }
+.fx { z-index: 2; }
+.sticker { position: relative; transform-origin: 0 0; }
+.sticker.settle { transition: transform 0.18s ease-out; }
+.label-shadow { position: relative; transition: filter 0.18s; }
+.sticker.held .label-shadow { filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4)) drop-shadow(0 24px 28px rgba(0,0,0,0.42)); }
+.label { position: relative; }
+.film, .tab { position: relative; }
+.damage, .back { position: absolute; left: 0; top: 0; pointer-events: none; }
+.damage { z-index: 5; }
+.back { z-index: 6; display: none; border-radius: var(--radius); }
+/* grab strips along every edge; the middle of the label stays free so phones can still scroll */
+.edge { position: absolute; z-index: 7; cursor: grab; touch-action: none; -webkit-tap-highlight-color: transparent; }
+.edge.t, .edge.b { left: -18px; right: -18px; height: 46px; }
+.edge.l, .edge.r { top: -18px; bottom: -18px; width: 46px; }
+.edge.t { top: -18px; } .edge.b { bottom: -18px; } .edge.l { left: -18px; } .edge.r { right: -18px; }
+.sticker.grabbing .edge, .sticker.held .edge { cursor: grabbing; }
+
+/* ---------- phones: the label stands upright, tabs top and bottom ---------- */
+@media (max-width: 560px) {
+  :root { --peel: 92px; }
+  body { padding: 28px 18px; }
+  .label { flex-direction: column; }
+  .tab { width: auto; height: 112px; }
+  .tab svg { width: 80px; height: 80px; }
+  .film { padding: 24px 22px 26px; }
+  .chip .cn { font-size: 13px; }
+  .chip .en { font-size: 15px; }
+  h1 { gap: 10px; font-size: clamp(34px, 11vw, 48px); }
+  .lede { font-size: 15px; }
+  .small { font-size: 12px; letter-spacing: 0.05em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flip, .glow span { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="glow" aria-hidden="true"><span class="a"></span><span class="b"></span><span class="c"></span></div>
+
+<div class="glass" aria-hidden="true"></div>
+
+<canvas class="residue" aria-hidden="true"></canvas>
+<main class="label-wrap">
+ <div class="sticker">
+  <div class="label-shadow">
+    <div class="label">
+      <canvas class="damage" aria-hidden="true"></canvas>
+      <div class="tab" aria-hidden="true">
+        <!-- do not touch -->
+        <svg viewBox="0 0 100 100" fill="none" stroke="#F3E83A" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="50" cy="50" r="42" stroke-width="6"/>
+          <g stroke-width="8">
+            <path d="M41 52V30M50 50V25M59 51V29M68 54V37M37 64L27 51"/>
+          </g>
+          <path fill="#F3E83A" stroke="none" d="M36 50H72V64Q72 79 56 79H49Q37 79 34 67Z"/>
+          <path stroke="#E9572F" stroke-width="13" stroke-linecap="butt" d="M27 73L73 27"/>
+          <path stroke-width="6" d="M21 79L79 21"/>
+        </svg>
+      </div>
+
+      <div class="film">
+        <div class="chip">
+          <span class="cn" lang="zh">撕毁无效</span>
+          <span class="en">VOIDS WARRANTY</span>
+        </div>
+        <h1>
+          <svg class="warn" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4L37 35H3Z" fill="none" stroke="#141517" stroke-width="3" stroke-linejoin="round"/><path d="M20 15v10" stroke="#141517" stroke-width="3.4" stroke-linecap="round"/><circle cx="20" cy="30" r="2" fill="#141517"/></svg>
+          <span>Not <span class="nw">found<span class="flip" aria-hidden="true">?</span></span></span>
+        </h1>
+        <p class="lede">Whatever was here has been removed, and nobody put it back. Peel the seal if you like, it&rsquo;s void anyway. Or head <a href="/">back to the front page</a>.</p>
+        <p class="small"><span>Error 404 · Void if removed</span><span>voidswarranty.com</span></p>
+      </div>
+
+      <div class="tab" aria-hidden="true">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#F3E83A" stroke-width="6"/>
+          <text class="seal-glyph" x="50" y="51" fill="#F3E83A" font-size="50" text-anchor="middle" dominant-baseline="central">封</text>
+        </svg>
+      </div>
+    </div>
+    <canvas class="back" aria-hidden="true"></canvas>
+  </div>
+
+  <i class="edge t" aria-hidden="true"></i><i class="edge r" aria-hidden="true"></i><i class="edge b" aria-hidden="true"></i><i class="edge l" aria-hidden="true"></i>
+ </div>
+</main>
+<canvas class="fx" aria-hidden="true"></canvas>
+<script>
+/* Peelable tamper label.
+   Grab any edge or corner. A fingernail first raises a small, tightly creased lip; pull further and the
+   label peels along a fold that rolls over a small cylinder and lies face down. Peel it all the way off
+   and it comes away in your hand: drop it anywhere and it sticks at the angle it landed.
+   Whatever is lifted leaves white VOID residue on the glass, loses that glue, and is scarred for good. */
+(() => {
+  const body = document.body;
+  const wrap = document.querySelector('.label-wrap');
+  const sticker = wrap.querySelector('.sticker');
+  const label = wrap.querySelector('.label');
+  const damageC = wrap.querySelector('.damage');
+  const backC = wrap.querySelector('.back');
+  const residueC = document.querySelector('.residue');
+  const fxC = document.querySelector('.fx');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const PI = Math.PI, RADIUS = 10, PICK = 14, BIG = 6000;
+  const norm3 = a => { const l = Math.hypot(a[0], a[1], a[2]); return a.map(x => x / l); };
+  const LIGHT = norm3([-0.35, -0.55, 0.76]);
+  const HALF = norm3([LIGHT[0], LIGHT[1], LIGHT[2] + 1]);
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const rot = (p, th) => { const c = Math.cos(th), s = Math.sin(th); return { x: p.x * c - p.y * s, y: p.x * s + p.y * c }; };
+
+  let W = 0, H = 0, dpr = 1, O = { x: 0, y: 0 };
+  let T = { x: 0, y: 0, th: 0 };          // where the sticker sits: page = T + R(th) * local
+  let cur = null;                          // current lift: { C, e, ce, n, D, q, p0, crimped }
+  let hold = null;                         // when fully peeled: { C, t, phi, last }
+  let mode = 'idle';                       // idle | peel | held
+  let tex = null, faceMask = null, scars = null, sil = null, stamps = [];
+  let anim = 0, flipAnim = 0, touched = false, queued = false, peels = 0;
+
+  const rng = seed => () => {
+    seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+  const px = n => Math.max(1, Math.round(n * dpr));
+  const makeCanvas = (w, h) => { const c = document.createElement('canvas'); c.width = px(w); c.height = px(h); return c; };
+  const fit = (c, w, h) => { c.width = px(w); c.height = px(h); c.style.width = w + 'px'; c.style.height = h + 'px'; };
+  const carry = old => { const c = makeCanvas(W, H); if (old) c.getContext('2d').drawImage(old, 0, 0, c.width, c.height); return c; };
+  const roundRect = ctx => { ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(0, 0, W, H, RADIUS); else ctx.rect(0, 0, W, H); };
+  const poly = (ctx, pts) => { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); };
+  const line = (ctx, pts) => { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); };
+  const corners = () => [{ x: 0, y: 0 }, { x: W, y: 0 }, { x: W, y: H }, { x: 0, y: H }];
+  const origin = () => { const a = wrap.getBoundingClientRect(), b = body.getBoundingClientRect(); return { x: a.left - b.left, y: a.top - b.top }; };
+  const setBase = (ctx, t = T) => { ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.translate(O.x + t.x, O.y + t.y); ctx.rotate(t.th); };
+
+  /* ---------- textures, built once per size ---------- */
+  function build() {
+    const rand = rng(20261116);
+    const voids = makeCanvas(W, H), vc = voids.getContext('2d');
+    vc.scale(dpr, dpr);
+    vc.fillStyle = '#FFFFFF';
+    vc.font = "700 13px 'IBM Plex Sans', system-ui, sans-serif";
+    vc.textBaseline = 'middle';
+    vc.textAlign = 'center';
+    vc.save();
+    vc.translate(W / 2, H / 2);
+    vc.rotate(-18 * PI / 180);
+    const ext = Math.hypot(W, H) / 2 + 40, sx = 46, sy = 21;
+    for (let y = -ext, row = 0; y < ext; y += sy, row++) {
+      for (let x = -ext + (row % 2 ? sx / 2 : 0); x < ext; x += sx) vc.fillText('VOID', x, y);
+    }
+    vc.restore();
+    // adhesive never transfers cleanly
+    vc.globalCompositeOperation = 'destination-out';
+    for (let i = 0, n = W * H / 28; i < n; i++) {
+      vc.globalAlpha = 0.45 + rand() * 0.55;
+      vc.beginPath(); vc.arc(rand() * W, rand() * H, 0.35 + rand() * 1.2, 0, 2 * PI); vc.fill();
+    }
+    for (let i = 0, n = W * H / 2600; i < n; i++) {
+      vc.globalAlpha = 0.2 + rand() * 0.45;
+      vc.beginPath(); vc.arc(rand() * W, rand() * H, 3 + rand() * 10, 0, 2 * PI); vc.fill();
+    }
+    vc.globalAlpha = 1;
+    vc.globalCompositeOperation = 'source-over';
+
+    const regs = [...label.querySelectorAll('.tab, .film')].map(el => (
+      { tab: el.classList.contains('tab'), x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight }));
+
+    // underside: white glue, with VOID-shaped gaps where it stayed on the glass
+    const under = makeCanvas(W, H), uc = under.getContext('2d');
+    uc.scale(dpr, dpr);
+    for (const r of regs) { uc.fillStyle = r.tab ? '#C24B2B' : '#A9ADB3'; uc.fillRect(r.x - 1, r.y - 1, r.w + 2, r.h + 2); }
+    const glue = makeCanvas(W, H), gc = glue.getContext('2d');
+    gc.scale(dpr, dpr);
+    gc.fillStyle = '#F1F0EB';
+    gc.fillRect(0, 0, W, H);
+    for (let i = 0, n = W * H / 50; i < n; i++) {
+      gc.fillStyle = `rgba(90,80,60,${rand() * 0.06})`;
+      gc.fillRect(rand() * W, rand() * H, 1, 1);
+    }
+    gc.setTransform(1, 0, 0, 1, 0, 0);
+    gc.globalCompositeOperation = 'destination-out';
+    gc.drawImage(voids, 0, 0);
+    uc.setTransform(1, 0, 0, 1, 0, 0);
+    uc.drawImage(glue, 0, 0);
+
+    // front face, seen only on the thin rising edge of the curl
+    const front = makeCanvas(W, H), fc = front.getContext('2d');
+    fc.scale(dpr, dpr);
+    for (const r of regs) { fc.fillStyle = r.tab ? '#E9572F' : '#C9CCCF'; fc.fillRect(r.x - 1, r.y - 1, r.w + 2, r.h + 2); }
+
+    tex = { voids, under, front };
+    fit(backC, W, H);
+    backC.getContext('2d').drawImage(under, 0, 0);
+  }
+
+  const restD = c => Math.min(W, H) * 0.045 + 6 + Math.min(peels, 5) * 3;
+  function hintCorner() {
+    const c = { C: { x: 0, y: H }, e: { x: Math.SQRT1_2, y: -Math.SQRT1_2 }, ce: [{ x: 1, y: 0 }, { x: 0, y: -1 }], q: 0, crimped: true };
+    c.n = c.e; c.D = restD(c);
+    return c;
+  }
+
+  function setup() {
+    const w = label.offsetWidth, h = label.offsetHeight;
+    if (!w || !h) return;
+    const resized = w !== W || h !== H;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = w; H = h;
+    const bw = body.clientWidth, bh = body.clientHeight;
+    fit(residueC, bw, bh);
+    fit(fxC, bw, bh);
+    sil = makeCanvas(bw, bh);
+    if (resized) {
+      fit(damageC, W, H);
+      faceMask = carry(faceMask);
+      scars = carry(scars);
+      for (const s of stamps) { s.mask = carry(s.mask); s.prior = carry(s.prior); s.out = carry(s.out); }
+      build();
+      if (mode === 'idle') cur = touched ? null : hintCorner();
+    }
+    applyTransform();
+    render(false);
+  }
+
+  /* ---------- geometry ---------- */
+  function geom(C, n, D) {
+    const r0 = clamp(Math.min(W, H) * 0.07, 10, 22);
+    const r = Math.min(r0, Math.max(1.5, D * 0.17));
+    const a = (D + PI * r) / 2;                 // where the label still grips, from the grab point along n
+    let ex = 0;                                 // how much deeper than the grab point the lift reaches
+    for (const X of corners()) ex = Math.max(ex, (C.x - X.x) * n.x + (C.y - X.y) * n.y);
+    return { D, n, r, a, C, m: a + C.x * n.x + C.y * n.y, dmax: a + ex, K: { x: C.x + a * n.x, y: C.y + a * n.y } };
+  }
+
+  // A sticker only lifts where it has been pulled: turn the fold toward the edge's inward
+  // direction until the lift is no wider than the pull can account for.
+  function constrain(C, e, v) {
+    const L = Math.hypot(v.x, v.y);
+    if (L < 0.5) return { n: e, D: 0 };
+    const nd = { x: v.x / L, y: v.y / L };
+    const test = b => {
+      let x = nd.x * (1 - b) + e.x * b, y = nd.y * (1 - b) + e.y * b;
+      const l = Math.hypot(x, y) || 1; x /= l; y /= l;
+      const D = Math.max(0, v.x * x + v.y * y), g = geom(C, { x, y }, D);
+      return { ok: g.dmax - g.a <= 1.6 * g.a + 6, n: { x, y }, D };
+    };
+    let best = test(0);
+    if (best.ok) return best;
+    best = test(1);
+    for (let lo = 0, hi = 1, i = 0; i < 12; i++) {
+      const mid = (lo + hi) / 2, t = test(mid);
+      if (t.ok) { hi = mid; best = t; } else lo = mid;
+    }
+    return best;
+  }
+
+  function stuckPolygon(G) {
+    const pts = corners(), out = [];
+    const f = P => P.x * G.n.x + P.y * G.n.y - G.m;
+    for (let i = 0; i < 4; i++) {
+      const A = pts[i], B = pts[(i + 1) % 4], fa = f(A), fb = f(B);
+      if (fa >= 0) out.push(A);
+      if ((fa >= 0) !== (fb >= 0)) { const t = fa / (fa - fb); out.push({ x: A.x + (B.x - A.x) * t, y: A.y + (B.y - A.y) * t }); }
+    }
+    return out;
+  }
+  const area = pts => { let s = 0; for (let i = 0; i < pts.length; i++) { const a = pts[i], b = pts[(i + 1) % pts.length]; s += a.x * b.y - b.x * a.y; } return Math.abs(s) / 2; };
+
+  function band(ctx, G, d0, d1) {
+    const L = BIG, t = { x: -G.n.y, y: G.n.x };
+    const q = d => ({ x: G.C.x + (G.a - d) * G.n.x, y: G.C.y + (G.a - d) * G.n.y });
+    const A = q(d0), B = q(d1);
+    ctx.beginPath();
+    ctx.moveTo(A.x + L * t.x, A.y + L * t.y);
+    ctx.lineTo(A.x - L * t.x, A.y - L * t.y);
+    ctx.lineTo(B.x - L * t.x, B.y - L * t.y);
+    ctx.lineTo(B.x + L * t.x, B.y + L * t.y);
+    ctx.closePath();
+  }
+
+  function strips(G) {
+    const out = [], roll = PI * G.r, cyl = Math.min(G.dmax, roll);
+    const N = Math.min(44, Math.max(8, Math.ceil(cyl / 1.4)));
+    const p = d => d < roll ? G.r * Math.sin(d / G.r) : -(d - roll);
+    for (let i = 0; i < N; i++) {
+      const d0 = cyl * i / N, d1 = cyl * (i + 1) / N;
+      out.push({ d0, d1, p0: p(d0), p1: p(d1), th: (d0 + d1) / 2 / G.r });
+    }
+    if (G.dmax > roll) out.push({ d0: roll, d1: G.dmax + 4, p0: 0, p1: -(G.dmax + 4 - roll), th: PI });
+    return out;
+  }
+
+  function stripTransform(G, s) {
+    const k = (s.p1 - s.p0) / (s.d1 - s.d0), q = 1 - k, n = G.n;
+    const a = 1 - q * n.x * n.x, b = -q * n.x * n.y, d = 1 - q * n.y * n.y;
+    const c = q * G.m + k * s.d0 - s.p0;
+    return [a, b, b, d, c * n.x, c * n.y];
+  }
+
+  function shade(G, s) {
+    const n = rot(G.n, T.th), th = s.th, sn = Math.sin(th), cs = Math.cos(th);
+    const front = th < PI / 2;
+    const N = front ? [-sn * n.x, -sn * n.y, cs] : [sn * n.x, sn * n.y, -cs];
+    const diff = Math.max(0, N[0] * LIGHT[0] + N[1] * LIGHT[1] + N[2] * LIGHT[2]);
+    const bri = (0.36 + 0.72 * diff) / (0.36 + 0.72 * LIGHT[2]);
+    const spec = Math.pow(Math.max(0, N[0] * HALF[0] + N[1] * HALF[1] + N[2] * HALF[2]), 28) * (front ? 0.22 : 0.42);
+    return { front, bri, spec };
+  }
+
+  function drawStrip(ctx, G, s, silhouette) {
+    ctx.save();
+    setBase(ctx);
+    ctx.transform(...stripTransform(G, s));
+    roundRect(ctx); ctx.clip();
+    band(ctx, G, s.d0 - 0.6, s.d1 + 0.6); ctx.clip();
+    const all = () => ctx.fillRect(-BIG, -BIG, 2 * BIG, 2 * BIG);
+    if (silhouette) { ctx.fillStyle = '#000'; all(); }
+    else {
+      const sh = shade(G, s);
+      ctx.drawImage(sh.front ? tex.front : tex.under, 0, 0, W, H);
+      if (sh.bri < 1) { ctx.fillStyle = `rgba(0,0,0,${Math.min(0.78, 1 - sh.bri)})`; all(); }
+      else if (sh.bri > 1.01) { ctx.fillStyle = `rgba(255,255,255,${Math.min(0.3, sh.bri - 1)})`; all(); }
+      if (sh.spec > 0.01) { ctx.fillStyle = `rgba(255,255,255,${sh.spec})`; all(); }
+      if (s.th >= PI) {
+        // the flat part is never perfectly flat: light falls off toward the free end
+        const q = d => ({ x: G.C.x + (G.a - d) * G.n.x, y: G.C.y + (G.a - d) * G.n.y });
+        const A = q(PI * G.r), B = q(G.dmax);
+        const g = ctx.createLinearGradient(A.x, A.y, B.x, B.y);
+        g.addColorStop(0, 'rgba(255,255,255,0.10)');
+        g.addColorStop(0.35, 'rgba(0,0,0,0)');
+        g.addColorStop(1, 'rgba(0,0,0,0.12)');
+        ctx.fillStyle = g; all();
+      }
+    }
+    ctx.restore();
+  }
+
+  /* ---------- the fingernail stage: a small lip with tight creases ---------- */
+  function pickShape(c, q) {
+    const C = c.C;
+    if (c.ce) {
+      const [e1, e2] = c.ce, g = 6 + 11 * q;
+      const A = { x: C.x + g * e1.x, y: C.y + g * e1.y }, B = { x: C.x + g * e2.x, y: C.y + g * e2.y };
+      const f = k => [{ x: A.x + k * g * e2.x, y: A.y + k * g * e2.y }, { x: B.x + k * g * e1.x, y: B.y + k * g * e1.y }];
+      return { notch: [C, A, B], lip: [A, B, { x: C.x + g * (e1.x + e2.x), y: C.y + g * (e1.y + e2.y) }], edge: [A, B], folds: [f(0.32), f(0.62)] };
+    }
+    const e = c.e, t = { x: -e.y, y: e.x }, w = 9 + 11 * q, h = 2 + 6 * q;
+    const par = k => {
+      const out = [];
+      for (let i = 0; i <= 12; i++) {
+        const s = -w + 2 * w * i / 12, d = k * h * (1 - (s / w) * (s / w));
+        out.push({ x: C.x + s * t.x + d * e.x, y: C.y + s * t.y + d * e.y });
+      }
+      return out;
+    };
+    const p1 = par(1);
+    return { notch: p1, lip: p1.concat(par(2).reverse()), edge: p1, folds: [par(1.33), par(1.66)] };
+  }
+
+  function drawLip(ctx, sh) {
+    ctx.save();
+    setBase(ctx);
+    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 5 * dpr; ctx.shadowOffsetX = 1.5 * dpr; ctx.shadowOffsetY = 2 * dpr;
+    poly(ctx, sh.lip); ctx.fillStyle = '#E9E8E3'; ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.lineCap = 'round';
+    for (const f of sh.folds) {
+      line(ctx, f); ctx.strokeStyle = 'rgba(0,0,0,0.38)'; ctx.lineWidth = 0.9; ctx.stroke();
+      ctx.save(); ctx.translate(0.7, 0.7); line(ctx, f); ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 0.7; ctx.stroke(); ctx.restore();
+    }
+    line(ctx, sh.edge); ctx.strokeStyle = 'rgba(0,0,0,0.45)'; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.restore();
+  }
+
+  function crimpScars(c, q) {
+    const sh = pickShape(c, q), ctx = scars.getContext('2d');
+    ctx.save();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    roundRect(ctx); ctx.clip();
+    ctx.lineCap = 'round';
+    for (const f of [sh.edge, ...sh.folds]) {
+      line(ctx, f); ctx.strokeStyle = 'rgba(0,0,0,0.26)'; ctx.lineWidth = 0.9; ctx.stroke();
+      ctx.save(); ctx.translate(0.7, 0.7); line(ctx, f); ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 0.7; ctx.stroke(); ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  /* ---------- residue on the glass, scars on the label ---------- */
+  function stamp() {
+    let s = stamps[stamps.length - 1];
+    if (!s || s.x !== T.x || s.y !== T.y || s.th !== T.th) {
+      // glue that already came off somewhere else cannot come off again here
+      s = { x: T.x, y: T.y, th: T.th, mask: makeCanvas(W, H), out: makeCanvas(W, H), prior: carry(faceMask) };
+      stamps.push(s);
+    }
+    return s;
+  }
+
+  function grow(path) {
+    const st = stamp();
+    for (const cv of [st.mask, faceMask]) {
+      const c = cv.getContext('2d');
+      c.save();
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      roundRect(c); c.clip();
+      path(c);
+      c.fillStyle = '#000';
+      c.fill();
+      c.restore();
+    }
+    const m = st.mask.getContext('2d');
+    m.save(); m.setTransform(1, 0, 0, 1, 0, 0); m.globalCompositeOperation = 'destination-out'; m.drawImage(st.prior, 0, 0); m.restore();
+    const o = st.out.getContext('2d');
+    o.setTransform(1, 0, 0, 1, 0, 0);
+    o.globalCompositeOperation = 'source-over';
+    o.clearRect(0, 0, st.out.width, st.out.height);
+    o.drawImage(st.mask, 0, 0);
+    o.globalCompositeOperation = 'source-in';
+    o.drawImage(tex.voids, 0, 0);
+  }
+
+  function paintMarks() {
+    const r = residueC.getContext('2d');
+    r.setTransform(1, 0, 0, 1, 0, 0);
+    r.clearRect(0, 0, residueC.width, residueC.height);
+    for (const s of stamps) { setBase(r, s); r.drawImage(s.out, 0, 0, W, H); }
+
+    // the face of a tamper label shows VOID wherever it has been lifted
+    const d = damageC.getContext('2d');
+    d.globalCompositeOperation = 'source-over';
+    d.globalAlpha = 1;
+    d.clearRect(0, 0, damageC.width, damageC.height);
+    d.drawImage(faceMask, 0, 0);
+    d.globalCompositeOperation = 'source-in';
+    d.globalAlpha = 0.42;
+    d.drawImage(tex.voids, 0, 0);
+    d.globalAlpha = 1;
+    d.globalCompositeOperation = 'source-over';
+    d.drawImage(scars, 0, 0);
+  }
+
+  function bubble(c, x, y, r) {
+    const g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(255,255,255,0.04)');
+    g.addColorStop(0.72, 'rgba(255,255,255,0.12)');
+    g.addColorStop(0.93, 'rgba(255,255,255,0.5)');
+    g.addColorStop(1, 'rgba(0,0,0,0.18)');
+    c.fillStyle = g;
+    c.beginPath(); c.arc(x, y, r, 0, 2 * PI); c.fill();
+    c.fillStyle = 'rgba(255,255,255,0.75)';
+    c.beginPath(); c.arc(x - r * 0.35, y - r * 0.38, Math.max(0.6, r * 0.22), 0, 2 * PI); c.fill();
+    c.strokeStyle = 'rgba(0,0,0,0.16)'; c.lineWidth = 0.8;
+    c.beginPath(); c.arc(x + 0.5, y + 0.6, r, 0.1 * PI, 0.9 * PI); c.stroke();
+  }
+  function wrinkle(c, x, y, ang, len) {
+    c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(ang) * len, y + Math.sin(ang) * len);
+    c.strokeStyle = 'rgba(0,0,0,0.13)'; c.lineWidth = 0.8; c.stroke();
+    c.beginPath(); c.moveTo(x + 0.8, y - 0.6); c.lineTo(x + 0.8 + Math.cos(ang) * len, y - 0.6 + Math.sin(ang) * len);
+    c.strokeStyle = 'rgba(255,255,255,0.32)'; c.lineWidth = 0.7; c.stroke();
+  }
+
+  function addScars(G) {
+    const c = scars.getContext('2d'), rand = Math.random;
+    const t = { x: -G.n.y, y: G.n.x }, L = W + H;
+    c.save();
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    roundRect(c); c.clip();
+    const crease = (offset, color, width) => {
+      c.beginPath();
+      for (let s = -L, first = true; s <= L; s += 5, first = false) {
+        const j = offset + (rand() - 0.5) * 0.8;
+        const x = G.K.x + s * t.x - j * G.n.x, y = G.K.y + s * t.y - j * G.n.y;
+        first ? c.moveTo(x, y) : c.lineTo(x, y);
+      }
+      c.strokeStyle = color; c.lineWidth = width; c.stroke();
+    };
+    crease(0.9, 'rgba(0,0,0,0.22)', 1.1);
+    crease(-0.5, 'rgba(255,255,255,0.5)', 0.9);
+    const base = Math.atan2(G.n.y, G.n.x);
+    for (let i = 0, k = 3 + Math.floor(rand() * 5); i < k; i++) {
+      const s = (rand() - 0.5) * Math.min(L, G.dmax * 1.8), u = 5 + rand() * G.dmax * 0.75;
+      bubble(c, G.K.x + s * t.x - u * G.n.x, G.K.y + s * t.y - u * G.n.y, 2 + rand() * 5.5);
+    }
+    for (let i = 0, k = 2 + Math.floor(rand() * 3); i < k; i++) {
+      const s = (rand() - 0.5) * Math.min(L, G.dmax * 1.4), u = rand() * G.dmax * 0.8;
+      wrinkle(c, G.K.x + s * t.x - u * G.n.x, G.K.y + s * t.y - u * G.n.y, base + (rand() - 0.5) * 1.3, 8 + rand() * 26);
+    }
+    c.restore();
+  }
+
+  // a sticker laid down by hand traps air and wrinkles all over
+  function addDropScars() {
+    const c = scars.getContext('2d'), rand = Math.random;
+    c.save();
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    roundRect(c); c.clip();
+    for (let i = 0, k = 7 + Math.floor(rand() * 7); i < k; i++) bubble(c, rand() * W, rand() * H, 2 + rand() * 7);
+    for (let i = 0, k = 3 + Math.floor(rand() * 4); i < k; i++) wrinkle(c, rand() * W, rand() * H, rand() * PI, 14 + rand() * 46);
+    c.restore();
+  }
+
+  /* ---------- frame ---------- */
+  const polyCss = pts => pts.map(p => `${p.x.toFixed(2)}px ${p.y.toFixed(2)}px`).join(',');
+
+  function render(growing) {
+    if (!tex) return;
+    O = origin();
+    const ctx = fxC.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, fxC.width, fxC.height);
+    let G = null, lip = null;
+
+    if (mode === 'held' || !cur) label.style.clipPath = '';
+    else if (cur.D < 0.75) {
+      if (cur.q > 0.02) {
+        lip = pickShape(cur, cur.q);
+        const r = corners();
+        label.style.clipPath = `polygon(evenodd, ${polyCss(r.concat([r[0]], lip.notch, [lip.notch[0]]))})`;
+        if (growing) grow(c => poly(c, lip.notch));
+      } else label.style.clipPath = '';
+    } else {
+      G = geom(cur.C, cur.n, cur.D);
+      const pts = stuckPolygon(G);
+      label.style.clipPath = pts.length > 2 ? `polygon(${polyCss(pts)})` : 'polygon(0 0, 0 0, 0 0)';
+      if (growing) grow(c => band(c, G, 0, G.dmax + 4));
+    }
+    paintMarks();
+    if (lip) drawLip(ctx, lip);
+    if (!G) return;
+    const list = strips(G);
+
+    // dark pocket under the roll
+    ctx.save();
+    setBase(ctx);
+    roundRect(ctx); ctx.clip();
+    band(ctx, G, 0, G.dmax + 4); ctx.clip();
+    const k = G.K, reach = G.r * 2.6;
+    const pocket = ctx.createLinearGradient(k.x, k.y, k.x - G.n.x * reach, k.y - G.n.y * reach);
+    pocket.addColorStop(0, 'rgba(0,0,0,0.55)');
+    pocket.addColorStop(0.4, 'rgba(0,0,0,0.2)');
+    pocket.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = pocket;
+    ctx.fillRect(-BIG, -BIG, 2 * BIG, 2 * BIG);
+    ctx.restore();
+
+    // shadow cast by the lifted flap
+    const sc = sil.getContext('2d');
+    sc.setTransform(1, 0, 0, 1, 0, 0);
+    sc.clearRect(0, 0, sil.width, sil.height);
+    for (const s of list) drawStrip(sc, G, s, true);
+    const lift = Math.min(1, G.D / 60);
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.shadowColor = `rgba(0,0,0,${0.22 + 0.2 * lift})`;
+    ctx.shadowBlur = (4 + G.r * 0.7 * lift) * dpr;
+    ctx.shadowOffsetX = 20000 + G.r * 0.5 * lift * dpr;
+    ctx.shadowOffsetY = G.r * 0.8 * lift * dpr;
+    ctx.drawImage(sil, -20000, 0);
+    ctx.restore();
+
+    for (const s of list) drawStrip(ctx, G, s, false);
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { queued = false; render(mode === 'peel'); });
+  }
+
+  function applyTransform() {
+    let s = `translate(${T.x.toFixed(2)}px,${T.y.toFixed(2)}px) rotate(${T.th.toFixed(5)}rad)`;
+    let back = false;
+    if (mode === 'held' && hold) {
+      const C = hold.C;
+      s += ` translate(${C.x}px,${C.y}px) rotate3d(${hold.t.x.toFixed(4)},${hold.t.y.toFixed(4)},0,${hold.phi.toFixed(2)}deg) scale(1.03) translate(${-C.x}px,${-C.y}px)`;
+      back = hold.phi > 90;
+    }
+    sticker.style.transform = s;
+    backC.style.display = back ? 'block' : 'none';
+    label.style.visibility = back ? 'hidden' : 'visible';
+  }
+
+  /* ---------- interaction ---------- */
+  function animateD(to, dur, after) {
+    cancelAnimationFrame(anim);
+    const c = cur, from = c.D, t0 = performance.now();
+    const step = now => {
+      if (cur !== c) return;
+      const t = Math.min(1, (now - t0) / Math.max(1, dur)), e = 1 - Math.pow(1 - t, 3);
+      // as it goes back down it can only stay lifted where it is still being held up
+      const k = constrain(c.C, c.e, { x: c.n.x * (from + (to - from) * e), y: c.n.y * (from + (to - from) * e) });
+      c.n = k.n; c.D = k.D;
+      render(false);
+      if (t < 1) anim = requestAnimationFrame(step); else if (after) after();
+    };
+    anim = requestAnimationFrame(step);
+  }
+
+  const world = e => { const r = wrap.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const local = e => { const w = world(e); return rot({ x: w.x - T.x, y: w.y - T.y }, -T.th); };
+
+  function grabPoint(p) {
+    const q = { x: clamp(p.x, 0, W), y: clamp(p.y, 0, H) };
+    const d = [q.y, W - q.x, H - q.y, q.x], i = d.indexOf(Math.min(...d));   // top, right, bottom, left
+    const C = [{ x: q.x, y: 0 }, { x: W, y: q.y }, { x: q.x, y: H }, { x: 0, y: q.y }][i];
+    const e = [{ x: 0, y: 1 }, { x: -1, y: 0 }, { x: 0, y: -1 }, { x: 1, y: 0 }][i];
+    const snap = Math.min(30, Math.min(W, H) * 0.2);
+    for (const X of corners()) {
+      if (Math.hypot(C.x - X.x, C.y - X.y) <= snap) {
+        const e1 = { x: X.x ? -1 : 1, y: 0 }, e2 = { x: 0, y: X.y ? -1 : 1 };
+        return { C: X, e: { x: e1.x * Math.SQRT1_2, y: e2.y * Math.SQRT1_2 }, ce: [e1, e2] };
+      }
+    }
+    return { C, e, ce: null };
+  }
+
+  function detach(e) {
+    grow(c => { c.beginPath(); c.rect(0, 0, W, H); });
+    const w = world(e), C = cur.C;
+    hold = { C, t: { x: -cur.n.y, y: cur.n.x }, phi: reduce ? 0 : 180, last: w };
+    cur = null;
+    mode = 'held';
+    peels++;
+    const rc = rot(C, T.th);
+    T = { x: w.x - rc.x, y: w.y - rc.y, th: T.th };
+    sticker.classList.add('held');
+    applyTransform();
+    render(false);
+    // it comes away face down, then turns over in the hand
+    const h = hold, t0 = performance.now();
+    const step = now => {
+      if (hold !== h) return;
+      const t = Math.min(1, (now - t0) / 320);
+      h.phi = 180 * (1 - (1 - Math.pow(1 - t, 3)));
+      applyTransform();
+      if (t < 1) flipAnim = requestAnimationFrame(step);
+    };
+    if (!reduce) flipAnim = requestAnimationFrame(step);
+  }
+
+  function onDown(e) {
+    if (!W || mode !== 'idle') return;
+    e.preventDefault();
+    touched = true;
+    cancelAnimationFrame(anim);
+    const p = local(e), g = grabPoint(p);
+    if (cur && cur.D > 0.75 && cur.C.x === g.C.x && cur.C.y === g.C.y) {
+      // picking up a corner that is already lifted
+      const k = 1 + PICK / cur.D;
+      cur.p0 = { x: p.x - cur.n.x * cur.D * k, y: p.y - cur.n.y * cur.D * k };
+    } else cur = { ...g, n: g.e, D: 0, q: 0, p0: p, crimped: false };
+    mode = 'peel';
+    sticker.classList.add('grabbing');
+    sticker.classList.remove('settle');
+    render(false);
+  }
+
+  function onMove(e) {
+    if (mode === 'peel') {
+      const p = local(e), c = cur, r = { x: p.x - c.p0.x, y: p.y - c.p0.y }, L = Math.hypot(r.x, r.y);
+      let D = 0, n = c.e;
+      if (L > PICK) ({ n, D } = constrain(c.C, c.e, { x: r.x * (1 - PICK / L), y: r.y * (1 - PICK / L) }));
+      c.q = clamp(Math.max(r.x * c.e.x + r.y * c.e.y, c.ce ? L * 0.6 : 0) / PICK, 0, 1);
+      c.D = D;
+      if (D >= 0.75) {
+        c.n = n;
+        if (!c.crimped) { crimpScars(c, 1); c.crimped = true; }
+        const G = geom(c.C, c.n, c.D), pts = stuckPolygon(G);
+        let far = 0;
+        for (const X of corners()) far = Math.max(far, (X.x - c.C.x) * c.n.x + (X.y - c.C.y) * c.n.y);
+        // once the last strip still holding is narrow, it lets go
+        if (pts.length < 3 || area(pts) < 0.4 * W * H || G.a > far - Math.min(W, H) * 0.3) { detach(e); return; }
+      }
+      schedule();
+    } else if (mode === 'held') {
+      // dragged by one point, the rest of the sticker trails behind it
+      const w = world(e), h = hold, d = { x: w.x - h.last.x, y: w.y - h.last.y };
+      h.last = w;
+      const arm = rot({ x: W / 2 - h.C.x, y: H / 2 - h.C.y }, T.th), len = Math.hypot(arm.x, arm.y) || 1;
+      const u = { x: arm.x / len, y: arm.y / len };
+      T.th += clamp(-(u.x * d.y - u.y * d.x) / (Math.max(len, 90) * 1.25), -0.2, 0.2);
+      const rc = rot(h.C, T.th);
+      T.x = w.x - rc.x; T.y = w.y - rc.y;
+      applyTransform();
+    }
+  }
+
+  function onUp() {
+    sticker.classList.remove('grabbing');
+    if (mode === 'peel') {
+      mode = 'idle';
+      const c = cur;
+      if (c.D < 0.75) {
+        if (c.q > 0.3 && !c.crimped) crimpScars(c, c.q);
+        cur = null;
+        render(false);
+      } else {
+        if (c.D > 28) { addScars(geom(c.C, c.n, c.D)); peels++; }
+        // it loses a little tack each time, so it never lies quite flat again
+        // a corner never lies quite flat again; an edge goes back down along its creases
+        animateD(c.ce ? Math.min(c.D, restD(c)) : 0, reduce ? 1 : 460, () => { if (!c.ce && cur === c) { cur = null; render(false); } });
+      }
+    } else if (mode === 'held') {
+      cancelAnimationFrame(flipAnim);
+      mode = 'idle';
+      hold = null;
+      T.th += (Math.random() - 0.5) * 0.06;
+      // keep it on the glass
+      const c = rot({ x: W / 2, y: H / 2 }, T.th), bw = body.clientWidth, bh = body.clientHeight;
+      const hx = Math.abs(W / 2 * Math.cos(T.th)) + Math.abs(H / 2 * Math.sin(T.th)) + 10;
+      const hy = Math.abs(W / 2 * Math.sin(T.th)) + Math.abs(H / 2 * Math.cos(T.th)) + 10;
+      const keep = (v, h, max) => h * 2 > max ? max / 2 : clamp(v, h, max - h);
+      const cx = keep(O.x + T.x + c.x, hx, bw), cy = keep(O.y + T.y + c.y, hy, bh);
+      T.x = cx - O.x - c.x; T.y = cy - O.y - c.y;
+      addDropScars();
+      sticker.classList.remove('held');
+      sticker.classList.add('settle');
+      applyTransform();
+      render(false);
+    }
+  }
+
+  let pid = null;
+  for (const el of wrap.querySelectorAll('.edge')) el.addEventListener('pointerdown', e => { if (pid === null) { onDown(e); if (mode === 'peel') pid = e.pointerId; } });
+  addEventListener('pointermove', e => { if (e.pointerId === pid) onMove(e); }, { passive: true });
+  const up = e => { if (e.pointerId === pid) { pid = null; onUp(); } };
+  addEventListener('pointerup', up);
+  addEventListener('pointercancel', up);
+
+  // until someone tries it, one corner lifts now and then
+  function hint() {
+    if (touched || mode !== 'idle' || reduce || !tex || !cur) return;
+    const rest = restD(cur);
+    animateD(rest + 30, 520, () => { if (!touched && cur) animateD(rest, 620); });
+  }
+  setTimeout(hint, 1400);
+  setInterval(hint, 4800);
+
+  const ro = new ResizeObserver(() => { if (mode === 'idle') setup(); });
+  ro.observe(label); ro.observe(body);
+  setup();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { W = 0; setup(); });
+})();
+</script>
+</body>
+</html>
